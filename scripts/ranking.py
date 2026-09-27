@@ -88,7 +88,7 @@ def parse_state(html: str) -> list[dict]:
                 if code_k and any(k.lower() in ("stockname", "name") for k in keys) and len(v) > len(best):
                     best = v
     if best:
-        print("  列:", {k: (v if not isinstance(v, (dict, list)) else type(v).__name__) for k, v in best[0].items()})
+        print("  列:", json.dumps(best[0], ensure_ascii=False)[:600])
     rows = []
     for r in best:
         k = {x.lower(): x for x in r}
