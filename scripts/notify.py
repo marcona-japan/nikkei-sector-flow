@@ -19,7 +19,7 @@ def webhook(kind: str | None = None) -> str | None:
     return os.environ.get("DISCORD_WEBHOOK_URL") or None
 
 
-def send(embeds: list[dict], username: str, kind: str | None = None) -> bool:
+def send(embeds: list[dict], username: str, kind: str | None = None, content: str | None = None) -> bool:
     url = webhook(kind)
     if not url:
         print("Discord Webhook 未設定のため送信スキップ")
@@ -27,7 +27,10 @@ def send(embeds: list[dict], username: str, kind: str | None = None) -> bool:
     # Discordは1メッセージ最大10 embed
     for i in range(0, len(embeds), 10):
         for attempt in range(3):
-            r = requests.post(url, json={"username": username, "embeds": embeds[i:i + 10]}, timeout=30)
+            body = {"username": username, "embeds": embeds[i:i + 10]}
+            if content and i == 0:
+                body["content"] = content  # スマホのプッシュ通知に出る本文
+            r = requests.post(url, json=body, timeout=30)
             if r.status_code == 429:  # レート制限
                 time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
                 continue
