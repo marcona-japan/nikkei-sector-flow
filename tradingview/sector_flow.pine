@@ -11,6 +11,7 @@ windowMin = input.int(30, "直近の集計時間（分）", minval = 5, step = 5
 alertPt   = input.float(3.0, "アラート：当日比がこのpt以上で流入通知", minval = 0.5, step = 0.5, group = "アラート")
 showTable = input.bool(true, "一覧表を表示", group = "表示")
 tablePos  = input.string("右上", "一覧表の位置", options = ["右上", "右下", "左上", "左下"], group = "表示")
+fontPt    = input.int(20, "一覧表の文字サイズ（pt）", minval = 8, maxval = 40, group = "表示")
 plotSel   = input.string("電機・精密", "線で表示する業種", options = ["食品", "エネルギー", "建設・資材", "素材・化学", "医薬品", "自動車・輸送機", "鉄鋼・非鉄", "機械", "電機・精密", "情報通信・他", "電力・ガス", "運輸・物流", "商社・卸売", "小売", "銀行", "金融(除銀行)", "不動産"], group = "表示")
 
 g1  = "01 食品"
@@ -149,36 +150,43 @@ selDelta = inSess and selIdx >= 0 ? array.get(delta, selIdx) : na
 maxDelta = inSess ? array.max(delta) : na
 minDelta = inSess ? array.min(delta) : na
 
-plot(selDelta, "選択業種の当日比(pt)", color = selDelta >= 0 ? color.new(#d03b3b, 0) : color.new(#2a78d6, 0), style = plot.style_columns, linewidth = 2)
-plot(maxDelta, "流入トップの当日比(pt)", color = color.new(#d03b3b, 50), linewidth = 1)
-plot(minDelta, "流出トップの当日比(pt)", color = color.new(#2a78d6, 50), linewidth = 1)
-hline(0, "0", color = color.new(color.gray, 50))
-hline(alertPt, "アラート基準", color = color.new(#d03b3b, 70), linestyle = hline.style_dotted)
+RED  = #e53935
+BLUE = #1e88e5
+plot(selDelta, "選択業種の当日比(pt)", color = selDelta >= 0 ? RED : BLUE, style = plot.style_columns, linewidth = 4)
+plot(maxDelta, "流入トップの当日比(pt)", color = #ff5252, linewidth = 2)
+plot(minDelta, "流出トップの当日比(pt)", color = #448aff, linewidth = 2)
+hline(0, "0", color = #787b86, linestyle = hline.style_solid)
+hline(alertPt, "アラート基準", color = #ff5252, linestyle = hline.style_dashed)
 
 // ───────── 一覧表（当日比の大きい順）
 pos = tablePos == "右上" ? position.top_right : tablePos == "右下" ? position.bottom_right : tablePos == "左上" ? position.top_left : position.bottom_left
-var table tb = table.new(pos, 4, 19, border_width = 1, frame_color = color.new(color.gray, 70), frame_width = 1, bgcolor = color.new(color.black, 85))
+var table tb = table.new(pos, 4, 19, border_width = 1, border_color = #363a45, frame_color = #363a45, frame_width = 2, bgcolor = #1e222d)
+
+// 当日比の強さで3段階の色（白文字が読める濃さ）
+cellBg(float dl) =>
+    na(dl) ? #2a2e39 : dl >= 2 ? #c62828 : dl >= 0.5 ? #e57373 : dl > -0.5 ? #2a2e39 : dl > -2 ? #64b5f6 : #1565c0
+cellTx(float dl) =>
+    na(dl) ? #b2b5be : math.abs(dl) >= 2 or math.abs(dl) < 0.5 ? #ffffff : #0d0d0d
 
 if showTable and barstate.islast
-    txt = color.new(color.white, 0)
-    table.cell(tb, 0, 0, "業種", text_color = txt, text_size = size.small)
-    table.cell(tb, 1, 0, "直近" + str.tostring(windowMin) + "分", text_color = txt, text_size = size.small)
-    table.cell(tb, 2, 0, "当日比", text_color = txt, text_size = size.small)
-    table.cell(tb, 3, 0, "騰落", text_color = txt, text_size = size.small)
+    hdrBg = #363a45
+    txt = #ffffff
+    table.cell(tb, 0, 0, "業種", text_color = txt, bgcolor = hdrBg, text_size = fontPt, text_halign = text.align_left)
+    table.cell(tb, 1, 0, "直近" + str.tostring(windowMin) + "分", text_color = txt, bgcolor = hdrBg, text_size = fontPt)
+    table.cell(tb, 2, 0, "当日比", text_color = txt, bgcolor = hdrBg, text_size = fontPt)
+    table.cell(tb, 3, 0, "騰落", text_color = txt, bgcolor = hdrBg, text_size = fontPt)
     idx = array.sort_indices(keepD, order.descending)
     for r = 0 to 16
         i = array.get(idx, r)
         dl = array.get(keepD, i)
         sw = array.get(keepW, i)
         pc = array.get(keepP, i)
-        strength = na(dl) ? 90 : math.max(20, 90 - math.abs(dl) * 12)
-        bg = na(dl) ? color.new(color.gray, 90) : dl >= 0 ? color.new(#d03b3b, strength) : color.new(#2a78d6, strength)
-        table.cell(tb, 0, r + 1, array.get(names, i), text_color = txt, text_size = size.small, text_halign = text.align_left)
-        table.cell(tb, 1, r + 1, na(sw) ? "-" : str.tostring(sw, "0.0") + "%", text_color = txt, text_size = size.small)
-        table.cell(tb, 2, r + 1, na(dl) ? "-" : (dl >= 0 ? "+" : "") + str.tostring(dl, "0.0") + "pt", text_color = txt, bgcolor = bg, text_size = size.small)
-        table.cell(tb, 3, r + 1, na(pc) ? "-" : (pc >= 0 ? "+" : "") + str.tostring(pc, "0.0") + "%", text_color = na(pc) ? txt : pc >= 0 ? color.new(#ff8a8a, 0) : color.new(#8ab8ff, 0), text_size = size.small)
+        table.cell(tb, 0, r + 1, array.get(names, i), text_color = txt, text_size = fontPt, text_halign = text.align_left)
+        table.cell(tb, 1, r + 1, na(sw) ? "-" : str.tostring(sw, "0.0") + "%", text_color = txt, text_size = fontPt, text_halign = text.align_right)
+        table.cell(tb, 2, r + 1, na(dl) ? "-" : (dl >= 0 ? "+" : "") + str.tostring(dl, "0.0") + "pt", text_color = cellTx(dl), bgcolor = cellBg(dl), text_size = fontPt, text_halign = text.align_right)
+        table.cell(tb, 3, r + 1, na(pc) ? "-" : (pc >= 0 ? "+" : "") + str.tostring(pc, "0.0") + "%", text_color = na(pc) ? #b2b5be : pc >= 0 ? #ff6b6b : #5ea8ff, text_size = fontPt, text_halign = text.align_right)
     note = barMin > windowMin ? "⚠ 足が集計時間より長い：5分足推奨" : inSess ? "赤=資金流入 青=流出（当日平均シェア比）" : "取引時間外：直近の大引け時点の値"
-    table.cell(tb, 0, 18, note, text_color = color.new(color.gray, 20), text_size = size.tiny, text_halign = text.align_left)
+    table.cell(tb, 0, 18, note, text_color = #d1d4dc, bgcolor = hdrBg, text_size = math.max(8, int(fontPt * 0.7)), text_halign = text.align_left)
     table.merge_cells(tb, 0, 18, 3, 18)
 
 // ───────── アラート（「alert()関数の呼び出し」で設定）
