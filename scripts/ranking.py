@@ -319,7 +319,7 @@ def main() -> None:
     wd = "月火水木金土日"[now.weekday()]
 
     MARKETS.update(market_map())
-    print(f"市場区分: {len(MARKETS)}銘柄", {c: MARKETS.get(c) for c in ("7203", "3803", "285A", "627A")})
+    print(f"市場区分: {len(MARKETS)}銘柄")
     fields = []
     today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
@@ -328,8 +328,6 @@ def main() -> None:
             print(f"ランキングの日付が {rows[0]['date']}（今日ではない）ため送信しません")
             return
         cnt = total if total is not None else len(rows)
-        if rows:
-            print("市場（Yahoo）例:", [(r["code"], r.get("market")) for r in rows[:3]])
         print(f"{title}: {cnt}件", *[line(r) for r in rows[:n]], sep="\n  ")
         if not rows:
             value = "該当なし"
