@@ -11,6 +11,7 @@ import json
 import re
 import sys
 import unicodedata
+from functools import lru_cache
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -110,8 +111,9 @@ def parse_state(html: str) -> list[dict]:
                     vol = sub.get("volume", vol)
                     tv = sub.get("tradingValue", tv)
         if CODE_RE.match(code):
+            mk = next((r[k[x]] for x in k if "market" in x and isinstance(r[k[x]], str)), "")
             rows.append({"code": code, "name": clean(str(name)), "price": _num(price), "pct": _num(pct),
-                         "vol": _num(vol), "tv": _num(tv), "date": str(r.get("date", ""))})
+                         "vol": _num(vol), "tv": _num(tv), "date": str(r.get("date", "")), "market": mk})
     return rows
 
 
@@ -167,6 +169,7 @@ def _txt(h: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h)).strip()
 
 
+@lru_cache(maxsize=1)
 def ipo_list() -> list[dict]:
     """JPX 新規上場会社情報ページから (上場日, 会社名, コード, 市場, 公開価格/仮条件, テクニカル上場か)"""
     # JPXは文字コードをヘッダーで返さないため、UTF-8として明示的に読む（文字化け対策）
@@ -257,6 +260,37 @@ def ipo_fields(today: date) -> list[dict]:
     return fields
 
 
+# ---------------------------------------------------------------- 市場区分の色分け
+MARKET_MARK = [("グロース", "🟥"), ("スタンダード", "🟨"), ("プライム", "🟦"), ("ETF", "⬜"), ("ETN", "⬜"),
+               ("REIT", "🟪"), ("インフラ", "🟪"), ("PRO", "⬛")]
+LEGEND = "🟦プライム 🟨スタンダード 🟥グロース ⬜ETF・ETN 🟪REIT等"
+
+
+def mark(market: str) -> str:
+    return next((e for k, e in MARKET_MARK if k in (market or "")), "")
+
+
+def market_map() -> dict[str, str]:
+    """銘柄コード → 市場区分（JPX上場銘柄一覧＋今月のIPO）"""
+    out: dict[str, str] = {}
+    try:
+        from constituents import fetch_jpx_all
+        x = fetch_jpx_all()
+        for c, m in zip(x["コード"].astype(str), x["市場・商品区分"].astype(str)):
+            out[c.strip().upper()] = m
+    except Exception as e:  # noqa: BLE001
+        print("市場区分の取得失敗:", e)
+    try:  # 一覧の更新は月1回のため、新規上場銘柄はIPO情報で補う
+        for x in ipo_list():
+            out.setdefault(x["code"], x["market"])
+    except Exception as e:  # noqa: BLE001
+        print("IPO市場区分の取得失敗:", e)
+    return out
+
+
+MARKETS: dict[str, str] = {}
+
+
 def line(r: dict) -> str:
     p = "" if r["price"] is None else f" {r['price']:,.0f}円" if r["price"] >= 100 else f" {r['price']:,.1f}円"
     c = "" if r.get("pct") is None else f" ({r['pct']:+.2f}%)"
@@ -265,7 +299,8 @@ def line(r: dict) -> str:
         x = f" {r['tv'] / 1e8:,.0f}億円"
     elif r.get("vol"):
         x = f" {r['vol'] / 1e4:,.0f}万株"
-    return f"`{r['code']}` {r['name'][:12]}{p}{c}{x}"
+    m = mark(r.get("market") or MARKETS.get(r["code"], ""))
+    return f"{m}`{r['code']}` {r['name'][:12]}{p}{c}{x}"
 
 
 def main() -> None:
@@ -283,6 +318,8 @@ def main() -> None:
     label = "前場引け" if sess == "am" else "大引け"
     wd = "月火水木金土日"[now.weekday()]
 
+    MARKETS.update(market_map())
+    print(f"市場区分: {len(MARKETS)}銘柄")
     fields = []
     today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
@@ -308,7 +345,7 @@ def main() -> None:
     fields += ipo_fields(now.date())
     embed = {"title": f"📋 日経マーケット速報 {now.month}/{now.day}({wd}) {label}",
              "color": 0x0B0B0B, "fields": fields,
-             "footer": {"text": "Yahoo!ファイナンス ランキング（全市場）より"}}
+             "footer": {"text": LEGEND + "\nYahoo!ファイナンス ランキング（全市場）より"}}
     if a.notify == "on":
         notify.send([embed], "マーケット速報", "ranking")
 

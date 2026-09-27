@@ -50,6 +50,14 @@ def fetch_nikkei() -> pd.DataFrame:
 
 
 def fetch_jpx() -> pd.DataFrame:
+    x = fetch_jpx_all()
+    x = x.rename(columns={"コード": "code", "33業種コード": "s33_code", "33業種区分": "sector"})
+    x["code"] = x["code"].str.strip().str.upper()
+    return x[["code", "s33_code", "sector"]]
+
+
+def fetch_jpx_all() -> pd.DataFrame:
+    """JPX「東証上場銘柄一覧」の全列（コード・銘柄名・市場・商品区分・33業種など）"""
     urls = []
     try:  # 掲載ページからファイルのリンクを探す（拡張子やURLが変わっても追従）
         page = requests.get(JPX_PAGE, headers=UA, timeout=30).text
@@ -68,9 +76,7 @@ def fetch_jpx() -> pd.DataFrame:
         break
     else:
         raise RuntimeError(f"JPX上場銘柄一覧を取得できません: {last}")
-    x = x.rename(columns={"コード": "code", "33業種コード": "s33_code", "33業種区分": "sector"})
-    x["code"] = x["code"].str.strip().str.upper()
-    return x[["code", "s33_code", "sector"]]
+    return x
 
 
 def build() -> pd.DataFrame:
