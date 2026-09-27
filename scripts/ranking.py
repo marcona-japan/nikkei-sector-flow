@@ -169,7 +169,8 @@ def _txt(h: str) -> str:
 
 def ipo_list() -> list[dict]:
     """JPX 新規上場会社情報ページから (上場日, 会社名, コード, 市場, 公開価格/仮条件, テクニカル上場か)"""
-    html = requests.get(IPO_URL, headers=UA, timeout=30).text
+    # JPXは文字コードをヘッダーで返さないため、UTF-8として明示的に読む（文字化け対策）
+    html = requests.get(IPO_URL, headers=UA, timeout=30).content.decode("utf-8", "ignore")
     rows = re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S)
     out = []
     for i, r in enumerate(rows[:-1]):
