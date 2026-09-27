@@ -87,8 +87,6 @@ def parse_state(html: str) -> list[dict]:
                 code_k = next((k for k in keys if k.lower() in ("stockcode", "code", "symbol")), None)
                 if code_k and any(k.lower() in ("stockname", "name") for k in keys) and len(v) > len(best):
                     best = v
-    if best:
-        print("  列:", json.dumps(best[0], ensure_ascii=False)[:600])
     rows = []
     for r in best:
         k = {x.lower(): x for x in r}
@@ -103,8 +101,17 @@ def parse_state(html: str) -> list[dict]:
             price = price.get("price") or price.get("value")
         if isinstance(pct, dict):
             pct = pct.get("rate") or pct.get("value")
+        vol = tv = None
+        rr = r.get("rankingResult")
+        if isinstance(rr, dict):  # 種類ごとの値は rankingResult.{stopPrice|volume|tradingValue} に入る
+            for sub in rr.values():
+                if isinstance(sub, dict):
+                    pct = sub.get("changePriceRate", pct)
+                    vol = sub.get("volume", vol)
+                    tv = sub.get("tradingValue", tv)
         if CODE_RE.match(code):
-            rows.append({"code": code, "name": clean(str(name)), "price": _num(price), "pct": _num(pct)})
+            rows.append({"code": code, "name": clean(str(name)), "price": _num(price), "pct": _num(pct),
+                         "vol": _num(vol), "tv": _num(tv), "date": str(r.get("date", ""))})
     return rows
 
 
@@ -154,8 +161,13 @@ def fetch(key: str) -> tuple[list[dict], int | None]:
 
 def line(r: dict) -> str:
     p = "" if r["price"] is None else f" {r['price']:,.0f}円" if r["price"] >= 100 else f" {r['price']:,.1f}円"
-    c = "" if r["pct"] is None else f" {r['pct']:+.2f}%"
-    return f"`{r['code']}` {r['name'][:14]}{p}{c}"
+    c = "" if r.get("pct") is None else f" ({r['pct']:+.2f}%)"
+    x = ""
+    if r.get("tv"):
+        x = f" {r['tv'] / 1e8:,.0f}億円"
+    elif r.get("vol"):
+        x = f" {r['vol'] / 1e4:,.0f}万株"
+    return f"`{r['code']}` {r['name'][:12]}{p}{c}{x}"
 
 
 def main() -> None:
@@ -174,8 +186,12 @@ def main() -> None:
     wd = "月火水木金土日"[now.weekday()]
 
     fields = []
+    today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
         rows, total = fetch(key)
+        if rows and rows[0].get("date") and rows[0]["date"] != today_md and not a.ignore_holiday:
+            print(f"ランキングの日付が {rows[0]['date']}（今日ではない）ため送信しません")
+            return
         cnt = total if total is not None else len(rows)
         print(f"{title}: {cnt}件", *[line(r) for r in rows[:n]], sep="\n  ")
         if not rows:
