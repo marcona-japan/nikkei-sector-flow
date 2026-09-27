@@ -261,8 +261,8 @@ def ipo_fields(today: date) -> list[dict]:
 
 
 # ---------------------------------------------------------------- 市場区分の色分け
-MARKET_MARK = [("グロース", "🟥"), ("スタンダード", "🟨"), ("プライム", "🟦"), ("ETF", "⬜"), ("ETN", "⬜"),
-               ("REIT", "🟪"), ("インフラ", "🟪"), ("PRO", "⬛")]
+MARKET_MARK = [("グロース", "🟥"), ("GRT", "🟥"), ("スタンダード", "🟨"), ("STD", "🟨"), ("プライム", "🟦"), ("PRM", "🟦"),
+               ("ETF", "⬜"), ("ETN", "⬜"), ("REIT", "🟪"), ("インフラ", "🟪"), ("PRO", "⬛")]
 LEGEND = "🟦プライム 🟨スタンダード 🟥グロース ⬜ETF・ETN 🟪REIT等"
 
 
@@ -299,7 +299,7 @@ def line(r: dict) -> str:
         x = f" {r['tv'] / 1e8:,.0f}億円"
     elif r.get("vol"):
         x = f" {r['vol'] / 1e4:,.0f}万株"
-    m = mark(r.get("market") or MARKETS.get(r["code"], ""))
+    m = mark(MARKETS.get(r["code"], "")) or mark(r.get("market", ""))
     return f"{m}`{r['code']}` {r['name'][:12]}{p}{c}{x}"
 
 
@@ -319,7 +319,7 @@ def main() -> None:
     wd = "月火水木金土日"[now.weekday()]
 
     MARKETS.update(market_map())
-    print(f"市場区分: {len(MARKETS)}銘柄")
+    print(f"市場区分: {len(MARKETS)}銘柄", {c: MARKETS.get(c) for c in ("7203", "3803", "285A", "627A")})
     fields = []
     today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
@@ -328,6 +328,8 @@ def main() -> None:
             print(f"ランキングの日付が {rows[0]['date']}（今日ではない）ため送信しません")
             return
         cnt = total if total is not None else len(rows)
+        if rows:
+            print("市場（Yahoo）例:", [(r["code"], r.get("market")) for r in rows[:3]])
         print(f"{title}: {cnt}件", *[line(r) for r in rows[:n]], sep="\n  ")
         if not rows:
             value = "該当なし"
