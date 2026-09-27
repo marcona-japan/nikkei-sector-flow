@@ -185,6 +185,26 @@ def upcoming(today: date, days: int = 7) -> list[str]:
     return out
 
 
+def next_major(today: date) -> list[str]:
+    """種類ごとに次の1件と、あと何日か"""
+    ev = json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
+    items = [(date.fromisoformat(e["date"]), e["title"]) for e in ev]
+    for y in (today.year, today.year + 1):
+        for d in sq_dates(y):
+            if d.month in (3, 6, 9, 12):
+                items.append((d, "メジャーSQ"))
+    kinds = [("FOMC", "FOMC"), ("日銀会合", "日銀会合"), ("米CPI", "米CPI"), ("全国CPI", "全国CPI"),
+             ("東京都区部CPI", "東京都区部CPI"), ("メジャーSQ", "メジャーSQ")]
+    out = []
+    for key, label in kinds:
+        nxt = next(((d, t) for d, t in sorted(items) if d > today and t.startswith(key)), None)
+        if nxt:
+            d, t = nxt
+            detail = t[len(key):].strip()
+            out.append((d, f"{label}: {d.month}/{d.day}({'月火水木金土日'[d.weekday()]}) あと{(d - today).days}日 {detail}"))
+    return [t for _, t in sorted(out)]
+
+
 # ---------------------------------------------------------------- レポート
 def pct(a, b):
     return (a / b - 1) * 100 if a is not None and b else None
@@ -247,12 +267,24 @@ def main() -> None:
         ls.append(f"日経平均 **{nk['price']:,.0f}**（{nk['chg']:+,.0f} / {nk['pct']:+.2f}%）")
     if tp:
         ls.append(f"TOPIX **{tp['price']:,.2f}**（{tp['chg']:+,.2f} / {tp['pct']:+.2f}%）")
-    if "nt" in rec:
-        d = f"（前日 {prev['nt']:.2f}）" if prev.get("nt") else ""
-        ls.append(f"NT倍率 **{rec['nt']:.2f}**{d}")
     if vi:
         ls.append(f"日経VI **{vi['close']:.2f}**（{vi['close'] - vi['prev']:+.2f}）")
     fields.append({"name": "📈 指数", "value": "\n".join(ls) or "—", "inline": False})
+
+    # NT倍率
+    if "nt" in rec:
+        nts = [days[k]["nt"] for k in keys if k <= today.isoformat() and days[k].get("nt")]
+        v = f"**{rec['nt']:.2f}倍**"
+        if prev.get("nt"):
+            dlt = rec["nt"] - prev["nt"]
+            v += f"（前日比 {dlt:+.2f}）→ " + ("日経平均の方が強い＝値がさハイテク主導" if dlt > 0.005
+                                              else "TOPIXの方が強い＝銀行・内需など幅広い買い" if dlt < -0.005 else "ほぼ横ばい")
+        else:
+            v += "（前日比は明日から表示）"
+        if len(nts) >= 5:
+            v += f"\n5日前 {nts[-5]:.2f} → 今日 {nts[-1]:.2f}"
+        v += "\n見方: 上昇＝ハイテク主導、低下＝銀行・内需など"
+        fields.append({"name": "⚖️ NT倍率（日経平均÷TOPIX）", "value": v, "inline": False})
 
     # 量
     ls = []
@@ -294,7 +326,7 @@ def main() -> None:
              + ("　⚠️40%超" if ss["ratio"] >= 40 else "") + (f"　※{sd.month}/{sd.day}分" if sd != today else ""))
         if top:
             v += "\n高い業種: " + "、".join(f"{s['name']} {s['ratio']:.1f}%" for s in top)
-        fields.append({"name": "⚖️ 偏り", "value": v, "inline": False})
+        fields.append({"name": "🐻 偏り（空売り）", "value": v, "inline": False})
 
     # 背景
     ls = []
@@ -316,6 +348,7 @@ def main() -> None:
 
     ev = upcoming(today)
     fields.append({"name": "📅 今後1週間の予定", "value": "\n".join(ev) or "大きな予定なし", "inline": False})
+    fields.append({"name": "⏳ 次の主要イベント", "value": "\n".join(next_major(today)) or "—", "inline": False})
 
     HIST.parent.mkdir(parents=True, exist_ok=True)
     keep = sorted(days)[-400:]
