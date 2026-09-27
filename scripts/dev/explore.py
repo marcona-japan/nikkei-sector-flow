@@ -5,20 +5,22 @@ out = pathlib.Path("dev_dump"); out.mkdir(exist_ok=True)
 def save(name, url):
     try:
         r = requests.get(url, headers=UA, timeout=40)
-        (out / name).write_bytes(r.content); print(name, r.status_code, len(r.content))
+        (out / name).write_bytes(r.content); print(name, r.status_code, len(r.content), url)
         return r
     except Exception as e:
         print(name, "ERR", e)
-save("y_up.html", "https://finance.yahoo.co.jp/stocks/ranking/up?market=all")
-save("y_down.html", "https://finance.yahoo.co.jp/stocks/ranking/down?market=all")
-save("y_topix.html", "https://finance.yahoo.co.jp/quote/998405.T")
-save("y_vi.html", "https://finance.yahoo.co.jp/quote/998407.O")
-r = save("jpx_daily.html", "https://www.jpx.co.jp/markets/statistics-equities/daily/index.html")
-for i, l in enumerate(re.findall(r'href="([^"]+est-set_\d+\.pdf)"', r.text)[:1]):
-    save("jpx_estset.pdf", "https://www.jpx.co.jp" + l)
-r = save("jpx_short.html", "https://www.jpx.co.jp/markets/statistics-equities/short-selling/index.html")
-for l in re.findall(r'href="([^"]+\.(?:pdf|xls|xlsx|csv))"', r.text)[:3]:
-    save("jpx_short_" + l.split("/")[-1], "https://www.jpx.co.jp" + l if l.startswith("/") else l)
-save("nk_vi.html", "https://indexes.nikkei.co.jp/nkave/index/profile?idx=nk225vi")
-save("nk_vi_daily.csv", "https://indexes.nikkei.co.jp/nkave/historical/nikkei_stock_average_vi_daily_jp.csv")
-save("jpx_top.html", "https://www.jpx.co.jp/markets/statistics-equities/index.html")
+pages = {
+ "inv": "https://www.jpx.co.jp/markets/statistics-equities/investor-type/index.html",
+ "margin": "https://www.jpx.co.jp/markets/statistics-equities/margin/index.html",
+ "arb": "https://www.jpx.co.jp/markets/statistics-derivatives/arbitrage/index.html",
+ "arb2": "https://www.jpx.co.jp/markets/statistics-equities/arbitrage/index.html",
+}
+for k, u in pages.items():
+    r = save(f"w_{k}.html", u)
+    if r is not None and r.ok:
+        links = re.findall(r'href="([^"]+\.(?:pdf|xls|xlsx|csv))"', r.text)
+        print(k, links[:12])
+        for i, l in enumerate(links[:4]):
+            save(f"w_{k}_{i}_" + l.split("/")[-1], "https://www.jpx.co.jp" + l if l.startswith("/") else l)
+save("w_mof_week.csv", "https://www.mof.go.jp/policy/international_policy/reference/itn_transactions_in_securities/week.csv")
+save("w_mof_page.html", "https://www.mof.go.jp/policy/international_policy/reference/itn_transactions_in_securities/week.htm")

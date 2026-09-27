@@ -1,0 +1,46 @@
+name: マーケット概況（日次）
+
+on:
+  schedule:
+    - cron: "15 9 * * 1-5"   # 18:15 JST（JPXの空売り集計の公表後）
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: "Discord通知"
+        type: choice
+        options: ["off", "on"]
+        default: "off"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-write
+  cancel-in-progress: false
+
+jobs:
+  market:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pdfplumber yfinance pandas
+      - name: 集計・通知
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_MARKET: ${{ secrets.DISCORD_WEBHOOK_MARKET }}
+        run: |
+          EXTRA=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then EXTRA="--ignore-holiday"; fi
+          python scripts/market.py --notify ${{ inputs.notify || 'on' }} $EXTRA
+      - name: 履歴を保存
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs/data/market.json
+          if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
+          git commit -m "market: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
+          git pull --rebase -q && git push
