@@ -1,0 +1,28 @@
+name: 本日のFX指標（朝）
+
+on:
+  schedule:
+    - cron: "30 22 * * 0-4"   # 平日 7:30 JST
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: "Discord通知"
+        type: choice
+        options: ["off", "on"]
+        default: "off"
+
+jobs:
+  today:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: 通知
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_MARKET: ${{ secrets.DISCORD_WEBHOOK_MARKET }}
+        run: python scripts/today.py --notify ${{ inputs.notify || 'on' }}

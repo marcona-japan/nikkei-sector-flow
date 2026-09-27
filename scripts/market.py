@@ -5,7 +5,7 @@
 - 広がり: 値上がり／値下がり銘柄数（Yahoo!ファイナンス、全市場）と騰落レシオ（25日、履歴が貯まってから）
 - 偏り: 空売り比率と業種別空売り比率（JPX）
 - 背景: ドル円・米10年金利・日本10年金利・米国株・原油（yfinance／財務省）
-- 予定: data/events.json とSQ日
+- 予定: data/events.json（日米欧英の重要指標・中銀）とSQ日
 
 履歴は docs/data/market.json に保存（騰落レシオ・前日比の計算用）。
 """
@@ -171,30 +171,51 @@ def sq_dates(y: int) -> list[date]:
     return res
 
 
-def upcoming(today: date, days: int = 7) -> list[str]:
-    ev = json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
-    items = [(date.fromisoformat(e["date"]), e["title"]) for e in ev]
+def load_events() -> list[dict]:
+    return json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
+
+
+def fmt_event(d: date, e: dict, with_date: bool = True) -> str:
+    """例: 10/2(金) 21:30 ★★★ 米雇用統計（9月） USD"""
+    head = f"{d.month}/{d.day}({'月火水木金土日'[d.weekday()]}) " if with_date else ""
+    tm = f"{e['time']} " if e.get("time") else ""
+    imp = e.get("imp", 2)
+    star = "★" * imp + "☆" * (3 - imp)
+    ccy = f" `{e['ccy']}`" if e.get("ccy") else ""
+    return f"{head}{tm}{star} {e['title']}{ccy}"
+
+
+def upcoming(today: date, days: int = 7, min_imp: int = 2) -> list[str]:
+    items = [(date.fromisoformat(e["date"]), e) for e in load_events() if e.get("imp", 2) >= min_imp]
     for y in (today.year, today.year + 1):
         for d in sq_dates(y):
-            items.append((d, "メジャーSQ" if d.month in (3, 6, 9, 12) else "SQ"))
+            items.append((d, {"title": "メジャーSQ" if d.month in (3, 6, 9, 12) else "SQ", "imp": 2,
+                              "time": "09:00", "ccy": "JPY"}))
     end = today + timedelta(days=days)
-    out = []
-    for d, t in sorted(items):
-        if today < d <= end:
-            out.append(f"{d.month}/{d.day}({'月火水木金土日'[d.weekday()]}) {t}")
+    rows = sorted(((d, e) for d, e in items if today < d <= end),
+                  key=lambda x: (x[0], x[1].get("time") or "99:99"))
+    out, size = [], 0
+    for d, e in rows:
+        line = fmt_event(d, e)
+        if size + len(line) + 1 > 1000:
+            out.append("…（ほか省略）")
+            break
+        out.append(line)
+        size += len(line) + 1
     return out
 
 
 def next_major(today: date) -> list[str]:
     """種類ごとに次の1件と、あと何日か"""
-    ev = json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
-    items = [(date.fromisoformat(e["date"]), e["title"]) for e in ev]
+    items = [(date.fromisoformat(e["date"]), e["title"]) for e in load_events()]
     for y in (today.year, today.year + 1):
         for d in sq_dates(y):
             if d.month in (3, 6, 9, 12):
                 items.append((d, "メジャーSQ"))
-    kinds = [("FOMC", "FOMC"), ("日銀会合", "日銀会合"), ("米CPI", "米CPI"), ("全国CPI", "全国CPI"),
-             ("東京都区部CPI", "東京都区部CPI"), ("メジャーSQ", "メジャーSQ")]
+    kinds = [("FOMC", "FOMC"), ("日銀会合", "日銀会合"), ("ECB理事会", "ECB"), ("BOE政策金利", "BOE"),
+             ("米雇用統計", "米雇用統計"), ("米CPI", "米CPI"), ("米PCE", "米PCE"), ("英CPI", "英CPI"),
+             ("ユーロ圏HICP", "ユーロ圏HICP"), ("全国CPI", "全国CPI"), ("東京都区部CPI", "東京都区部CPI"),
+             ("日銀短観", "日銀短観"), ("メジャーSQ", "メジャーSQ")]
     out = []
     for key, label in kinds:
         nxt = next(((d, t) for d, t in sorted(items) if d > today and t.startswith(key)), None)
@@ -347,7 +368,7 @@ def main() -> None:
     fields.append({"name": "🌐 背景", "value": "\n".join(ls) or "—", "inline": False})
 
     ev = upcoming(today)
-    fields.append({"name": "📅 今後1週間の予定", "value": "\n".join(ev) or "大きな予定なし", "inline": False})
+    fields.append({"name": "📅 今後1週間の予定（★★以上・日本時間）", "value": "\n".join(ev) or "大きな予定なし", "inline": False})
     fields.append({"name": "⏳ 次の主要イベント", "value": "\n".join(next_major(today)) or "—", "inline": False})
 
     HIST.parent.mkdir(parents=True, exist_ok=True)
