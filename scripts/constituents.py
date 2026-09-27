@@ -19,7 +19,11 @@ ROOT = Path(__file__).resolve().parent.parent
 CSV = ROOT / "data" / "constituents.csv"
 STAMP = ROOT / "data" / "constituents_updated.txt"  # git checkoutでmtimeが変わるため日付を別保存
 NIKKEI_URL = "https://indexes.nikkei.co.jp/nkave/index/component?idx=nk225"
-JPX_URL = "https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls"
+JPX_PAGE = "https://www.jpx.co.jp/markets/statistics-equities/misc/01.html"
+JPX_FALLBACK = [
+    "https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xlsx",
+    "https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls",
+]
 UA = {"User-Agent": "Mozilla/5.0 (compatible; nikkei-sector-flow/1.0)"}
 CODE_RE = re.compile(r"^[0-9][0-9A-Z]{3}$")
 
@@ -46,8 +50,24 @@ def fetch_nikkei() -> pd.DataFrame:
 
 
 def fetch_jpx() -> pd.DataFrame:
-    raw = requests.get(JPX_URL, headers=UA, timeout=60).content
-    x = pd.read_excel(io.BytesIO(raw), dtype=str)
+    urls = []
+    try:  # 掲載ページからファイルのリンクを探す（拡張子やURLが変わっても追従）
+        page = requests.get(JPX_PAGE, headers=UA, timeout=30).text
+        for m in re.findall(r'href="([^"]*data_j\.xlsx?)"', page):
+            urls.append(requests.compat.urljoin(JPX_PAGE, m))
+    except Exception as e:  # noqa: BLE001
+        print("JPX掲載ページの取得に失敗:", e, file=sys.stderr)
+    last = None
+    for url in urls + JPX_FALLBACK:
+        r = requests.get(url, headers=UA, timeout=60)
+        if r.status_code != 200 or r.content[:1] == b"<":
+            last = f"{url} -> {r.status_code}"
+            continue
+        engine = "openpyxl" if r.content[:2] == b"PK" else "xlrd"
+        x = pd.read_excel(io.BytesIO(r.content), dtype=str, engine=engine)
+        break
+    else:
+        raise RuntimeError(f"JPX上場銘柄一覧を取得できません: {last}")
     x = x.rename(columns={"コード": "code", "33業種コード": "s33_code", "33業種区分": "sector"})
     x["code"] = x["code"].str.strip().str.upper()
     return x[["code", "s33_code", "sector"]]

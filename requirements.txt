@@ -6,3 +6,4 @@ lxml
 html5lib
 beautifulsoup4
 xlrd>=2.0
+openpyxl
