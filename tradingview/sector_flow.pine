@@ -67,7 +67,13 @@ s17a = input.symbol("TSE:8801", "銘柄1", group = g17, inline = g17)
 s17b = input.symbol("TSE:8802", "銘柄2", group = g17, inline = g17)
 
 // ───────── 共通処理
-newDay = timeframe.change("D")
+// 東証の取引時間（9:00〜15:30）だけを集計。先物の夜間セッションでは大引け時点の値を表示し続ける
+inSess = not na(time(timeframe.period, "0900-1530", "Asia/Tokyo"))
+curDate = year(time, "Asia/Tokyo") * 10000 + month(time, "Asia/Tokyo") * 100 + dayofmonth(time, "Asia/Tokyo")
+var int lastDate = na
+newDay = inSess and (na(lastDate) or curDate != lastDate)
+if inSess
+    lastDate := curDate
 barMin = timeframe.in_seconds() / 60.0
 winLen = math.max(1, int(math.round(windowMin / barMin)))
 
@@ -129,11 +135,19 @@ for i = 0 to 16
     array.set(shareW, i, sw)
     array.set(delta, i, na(sw) or na(sd) ? na : sw - sd)
 
+var float[] keepW = array.new_float(17, na)
+var float[] keepD = array.new_float(17, na)
+var float[] keepP = array.new_float(17, na)
+if inSess
+    keepW := array.copy(shareW)
+    keepD := array.copy(delta)
+    keepP := array.copy(pArr)
+
 // ───────── 線：選んだ業種の当日比（pt）と、流入トップ／流出トップ
 selIdx = array.indexof(names, plotSel)
-selDelta = selIdx >= 0 ? array.get(delta, selIdx) : na
-maxDelta = array.max(delta)
-minDelta = array.min(delta)
+selDelta = inSess and selIdx >= 0 ? array.get(delta, selIdx) : na
+maxDelta = inSess ? array.max(delta) : na
+minDelta = inSess ? array.min(delta) : na
 
 plot(selDelta, "選択業種の当日比(pt)", color = selDelta >= 0 ? color.new(#d03b3b, 0) : color.new(#2a78d6, 0), style = plot.style_columns, linewidth = 2)
 plot(maxDelta, "流入トップの当日比(pt)", color = color.new(#d03b3b, 50), linewidth = 1)
@@ -151,24 +165,25 @@ if showTable and barstate.islast
     table.cell(tb, 1, 0, "直近" + str.tostring(windowMin) + "分", text_color = txt, text_size = size.small)
     table.cell(tb, 2, 0, "当日比", text_color = txt, text_size = size.small)
     table.cell(tb, 3, 0, "騰落", text_color = txt, text_size = size.small)
-    idx = array.sort_indices(delta, order.descending)
+    idx = array.sort_indices(keepD, order.descending)
     for r = 0 to 16
         i = array.get(idx, r)
-        dl = array.get(delta, i)
-        sw = array.get(shareW, i)
-        pc = array.get(pArr, i)
+        dl = array.get(keepD, i)
+        sw = array.get(keepW, i)
+        pc = array.get(keepP, i)
         strength = na(dl) ? 90 : math.max(20, 90 - math.abs(dl) * 12)
         bg = na(dl) ? color.new(color.gray, 90) : dl >= 0 ? color.new(#d03b3b, strength) : color.new(#2a78d6, strength)
         table.cell(tb, 0, r + 1, array.get(names, i), text_color = txt, text_size = size.small, text_halign = text.align_left)
         table.cell(tb, 1, r + 1, na(sw) ? "-" : str.tostring(sw, "0.0") + "%", text_color = txt, text_size = size.small)
         table.cell(tb, 2, r + 1, na(dl) ? "-" : (dl >= 0 ? "+" : "") + str.tostring(dl, "0.0") + "pt", text_color = txt, bgcolor = bg, text_size = size.small)
         table.cell(tb, 3, r + 1, na(pc) ? "-" : (pc >= 0 ? "+" : "") + str.tostring(pc, "0.0") + "%", text_color = na(pc) ? txt : pc >= 0 ? color.new(#ff8a8a, 0) : color.new(#8ab8ff, 0), text_size = size.small)
-    table.cell(tb, 0, 18, "赤=資金流入 青=流出（当日平均シェア比）", text_color = color.new(color.gray, 20), text_size = size.tiny, text_halign = text.align_left)
+    note = barMin > windowMin ? "⚠ 足が集計時間より長い：5分足推奨" : inSess ? "赤=資金流入 青=流出（当日平均シェア比）" : "取引時間外：直近の大引け時点の値"
+    table.cell(tb, 0, 18, note, text_color = color.new(color.gray, 20), text_size = size.tiny, text_halign = text.align_left)
     table.merge_cells(tb, 0, 18, 3, 18)
 
 // ───────── アラート（「alert()関数の呼び出し」で設定）
 var float[] prevDelta = array.new_float(17, na)
-if barstate.isconfirmed
+if barstate.isconfirmed and inSess
     msg = ""
     for i = 0 to 16
         dl = array.get(delta, i)
