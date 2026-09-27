@@ -1,0 +1,37 @@
+name: マーケット速報（ランキング）
+
+on:
+  schedule:
+    - cron: "40 2 * * 1-5"   # 11:40 JST 前場引け
+    - cron: "40 6 * * 1-5"   # 15:40 JST 大引け
+  workflow_dispatch:
+    inputs:
+      session:
+        description: "前場(am)／大引け(pm)"
+        type: choice
+        options: ["auto", "am", "pm"]
+        default: "auto"
+      notify:
+        description: "Discord通知"
+        type: choice
+        options: ["off", "on"]
+        default: "off"
+
+jobs:
+  ranking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas lxml html5lib beautifulsoup4 jpholiday
+      - name: ランキング取得・通知
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_RANKING: ${{ secrets.DISCORD_WEBHOOK_RANKING }}
+        run: |
+          EXTRA=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then EXTRA="--ignore-holiday"; fi
+          python scripts/ranking.py --session ${{ inputs.session || 'auto' }} --notify ${{ inputs.notify || 'on' }} $EXTRA

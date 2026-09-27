@@ -10,8 +10,13 @@
 - 構成銘柄: 日経インデックス公式 / 33業種: JPX上場銘柄一覧（週1回更新 → `data/constituents.csv`）
 - 株価・出来高: Yahoo Finance（約20分遅れ）。売買代金は5分足の (高+安+終)/3 × 出来高 で概算
 
+## 追加の自動処理
+- **TDnet開示チェック**（`scripts/tdnet.py`）: `data/watchlist.csv` の監視銘柄の適時開示を平日8:00〜20:30に30分ごとにチェックしDiscordへ。一覧は `docs/tdnet.html`
+- **マーケット速報**（`scripts/ranking.py`）: ストップ高・安、出来高・売買代金上位を11:40と15:40にDiscordへ
+
 ## 設定
 - Secrets `DISCORD_WEBHOOK_URL`: 通知先チャンネルのWebhook URL（未設定なら通知をスキップ）
+- 任意: `DISCORD_WEBHOOK_TDNET` / `DISCORD_WEBHOOK_RANKING` を登録すると、その通知だけ別チャンネルに送る
 - 手動実行: Actions →「セクター資金移動の更新」→ Run workflow（日付・通知の有無を指定）
 
 | 区間 | 時間 |

@@ -1,19 +1,14 @@
-name: セクター資金移動の更新
+name: TDnet開示チェック
 
 on:
   schedule:
-    # 平日（UTC表記）。Yahooの約20分遅れを見込んで各区間の終了後に実行
-    - cron: "50 0 * * 1-5"   # 09:50 JST 前場 寄り
-    - cron: "20 2 * * 1-5"   # 11:20 JST 前場 中盤
-    - cron: "50 2 * * 1-5"   # 11:50 JST 前場 引け
-    - cron: "20 4 * * 1-5"   # 13:20 JST 後場 寄り
-    - cron: "20 6 * * 1-5"   # 15:20 JST 後場 中盤
-    - cron: "0 7 * * 1-5"    # 16:00 JST 大引け確定＋Discord通知
-    - cron: "40 7 * * 1-5"   # 16:40 JST 予備（未通知のときだけ送る）
+    # 平日 8:00〜20:30 JST に30分ごと（UTC表記）
+    - cron: "*/30 23 * * 0-4"
+    - cron: "*/30 0-11 * * 1-5"
   workflow_dispatch:
     inputs:
       date:
-        description: "集計日 YYYY-MM-DD（空欄＝今日）"
+        description: "対象日 YYYY-MM-DD（空欄＝今日と前日）"
         required: false
       notify:
         description: "Discord通知"
@@ -29,29 +24,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  update:
+  tdnet:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-      - run: pip install -r requirements.txt
-      - name: 集計
+      - run: pip install requests
+      - name: 開示チェック
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          DISCORD_WEBHOOK_TDNET: ${{ secrets.DISCORD_WEBHOOK_TDNET }}
         run: |
           ARGS="--notify ${{ inputs.notify || 'auto' }}"
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
-          python scripts/run.py $ARGS
+          python scripts/tdnet.py $ARGS
       - name: 結果を保存
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A docs/data data
+          git add -A docs/data/tdnet.json data/tdnet_seen.json
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
-          git commit -m "data: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
+          git commit -m "tdnet: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
           git pull --rebase -q && git push
