@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>セクター資金移動</title>
+<meta name="description" content="日経225構成銘柄を東証33業種で集計し、前場・後場6区間の売買代金シェアの移動を表示">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="資金移動">
+<meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f3ef; --surface:#fcfcfb; --line:#e4e2dc; --grid:#ecebe6;
+  --text:#0b0b0b; --text2:#52514e; --muted:#7a7873;
+  --in:#d03b3b;   /* 流入（株式市場の慣習どおり赤） */
+  --out:#2a78d6;  /* 流出 */
+  --mid:#f0efec;
+  --accent:#0b0b0b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121211; --surface:#1a1a19; --line:#2e2e2b; --grid:#262624;
+    --text:#ffffff; --text2:#c3c2b7; --muted:#95948b;
+    --in:#e66767; --out:#3987e5; --mid:#383835; --accent:#ffffff;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211; --surface:#1a1a19; --line:#2e2e2b; --grid:#262624;
+  --text:#ffffff; --text2:#c3c2b7; --muted:#95948b;
+  --in:#e66767; --out:#3987e5; --mid:#383835; --accent:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",sans-serif;
+  -webkit-text-size-adjust:100%;padding:env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom))}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+header{padding:16px 0 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:19px;margin:0;letter-spacing:.02em}
+.sub{color:var(--text2);font-size:12.5px}
+select,button{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px}
+select{padding:6px 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.card h2{font-size:15px;margin:0 0 2px}
+.card .desc{color:var(--muted);font-size:12px;margin:0 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi .l{color:var(--text2);font-size:11.5px}
+.kpi .v{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .v small{font-size:12px;font-weight:500;color:var(--text2)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--text2)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.chip.live .dot{background:var(--in)}
+.seg{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:0 -2px 10px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:0 0 auto;padding:6px 10px;font-size:12.5px;color:var(--text2);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.seg button:disabled{opacity:.4}
+/* flow */
+.flowhead{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:14px;margin-bottom:10px;text-align:center}
+.flowhead .arrow{color:var(--muted)}
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.flow h3{font-size:12px;margin:0 0 6px;font-weight:600;color:var(--text2)}
+.frow{display:grid;grid-template-columns:1fr;gap:2px;margin-bottom:8px;cursor:pointer}
+.frow .n{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frow .b{display:flex;align-items:center;gap:6px}
+.frow .bar{height:8px;border-radius:4px;min-width:3px}
+.out .frow .b{flex-direction:row-reverse}
+.out .bar{background:var(--out)}
+.in .bar{background:var(--in)}
+.frow .val{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.out{ text-align:right}
+.empty{color:var(--muted);font-size:13px;padding:12px 0;text-align:center}
+/* heatmap */
+.hm{width:100%;border-collapse:separate;border-spacing:2px;table-layout:fixed}
+.hm th{font-size:10.5px;font-weight:500;color:var(--text2);padding:0 0 4px;line-height:1.25;vertical-align:bottom}
+.hm th.sec{width:92px}
+.hm td{height:24px;border-radius:4px;padding:0}
+.hm td.sec{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px;border-radius:0;cursor:pointer}
+.hm td.c{cursor:pointer;position:relative}
+.hm td.c.pending{background:repeating-linear-gradient(135deg,var(--grid) 0 3px,transparent 3px 7px)}
+.hm tr.sel td.sec{font-weight:700}
+.hm td.c.sel{outline:2px solid var(--text);outline-offset:0}
+.legend{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text2);margin:10px 0 0}
+.legend .grad{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--out),var(--mid),var(--in))}
+.opts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.opts label{font-size:12px;color:var(--text2)}
+/* detail */
+#detail{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));z-index:5}
+#detail .card{box-shadow:0 6px 24px rgba(0,0,0,.18);margin:0}
+#detail .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#detail .x{border:0;background:none;color:var(--text2);font-size:20px;line-height:1;padding:0 4px}
+#detail svg{display:block;width:100%;height:auto;margin-top:6px}
+.stocks{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px}
+.stocks li{display:flex;justify-content:space-between;border-top:1px solid var(--grid);padding:4px 0;font-variant-numeric:tabular-nums}
+.stocks li span:last-child{color:var(--text2)}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--text2);font-size:13px}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums;margin-top:8px}
+.tbl th,.tbl td{padding:4px 3px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:normal}
+.tblwrap{overflow-x:auto}
+footer{color:var(--muted);font-size:11.5px;padding:8px 0 0}
+#tip{position:fixed;pointer-events:none;background:var(--text);color:var(--surface);font-size:12px;padding:6px 8px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:10;max-width:220px}
+.err{color:var(--in);font-size:13px}
+@media (max-width:380px){.kpi .v{font-size:16px}.hm th.sec{width:80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>セクター資金移動</h1>
+      <div class="sub">日経225構成銘柄 × 東証33業種 ・ 売買代金シェア</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="status" class="chip"><span class="dot"></span><span>—</span></span>
+      <select id="date" aria-label="日付"></select>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">売買代金</div><div class="v" id="k-total">—</div></div>
+    <div class="kpi"><div class="l">20日平均比</div><div class="v" id="k-vs">—</div></div>
+    <div class="kpi"><div class="l">更新</div><div class="v" id="k-upd">—</div></div>
+  </div>
+
+  <section class="card">
+    <h2>どこからどこへ</h2>
+    <p class="desc">区間を選ぶと、売買代金シェアが減った業種（流出）と増えた業種（流入）を並べます。単位はシェアの増減（pt）。</p>
+    <div class="seg" id="seg"></div>
+    <div class="flowhead" id="flowhead"></div>
+    <div class="flow">
+      <div class="out"><h3>流出 ◀</h3><div id="f-out"></div></div>
+      <div class="in"><h3>▶ 流入</h3><div id="f-in"></div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>6区間の資金の集まり方</h2>
+    <p class="desc">各区間の業種シェアが基準よりどれだけ多いか（赤）少ないか（青）。業種名かマスをタップで詳細。</p>
+    <div class="opts">
+      <label>基準
+        <select id="basis">
+          <option value="base">過去20日平均シェア</option>
+          <option value="day">当日平均シェア</option>
+        </select>
+      </label>
+      <label>並び順
+        <select id="sort">
+          <option value="dev">当日の流入が大きい順</option>
+          <option value="share">当日シェアが大きい順</option>
+          <option value="code">業種コード順</option>
+        </select>
+      </label>
+    </div>
+    <table class="hm" id="hm"></table>
+    <div class="legend"><span>流出</span><span class="grad"></span><span>流入</span><span id="scale"></span></div>
+    <details>
+      <summary>表で見る（区間別シェア %）</summary>
+      <div class="tblwrap"><table class="tbl" id="tbl"></table></div>
+    </details>
+  </section>
+
+  <div id="detail" hidden></div>
+
+  <footer id="note"></footer>
+</div>
+<div id="tip" role="status"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmtYen = v => v == null ? '—' : v >= 1e12 ? (v/1e12).toFixed(2)+'<small>兆円</small>' : Math.round(v/1e8).toLocaleString()+'<small>億円</small>';
+const fmtYenTxt = v => v >= 1e12 ? (v/1e12).toFixed(2)+'兆円' : Math.round(v/1e8).toLocaleString()+'億円';
+const pt = v => (v>0?'+':'')+v.toFixed(2)+'pt';
+let D = null, mode = 1, selSector = null, selWin = null;
+
+async function getJSON(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); }
+
+async function init(){
+  try{
+    const idx = await getJSON('data/index.json');
+    const sel = $('#date');
+    sel.innerHTML = idx.slice().reverse().map(d=>{
+      const dt = new Date(d+'T00:00:00+09:00'); return `<option value="${d}">${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})</option>`;}).join('');
+    sel.onchange = () => load(sel.value);
+    await load(idx[idx.length-1]);
+  }catch(e){ $('#f-in').innerHTML = `<p class="err">データを読み込めませんでした（${e.message}）</p>`; }
+  $('#basis').onchange = renderHeat; $('#sort').onchange = renderHeat;
+}
+
+async function load(d){
+  D = await getJSON(`data/${d}.json`);
+  D.sectors.forEach(s => s.dev = s.day_share == null ? 0 : s.day_share - s.base);
+  selSector = null; selWin = null; $('#detail').hidden = true;
+  renderHead(); renderSeg(); renderHeat();
+}
+
+function renderHead(){
+  $('#k-total').innerHTML = fmtYen(D.day_total);
+  $('#k-vs').innerHTML = D.base_total ? ((D.day_total/D.base_total-1)*100).toFixed(0).replace(/^(?!-)/,'+')+'<small>%</small>' : '—';
+  $('#k-upd').innerHTML = D.updated.slice(11)+'<small> JST</small>';
+  const st = $('#status'); st.className = 'chip' + (D.final ? '' : ' live');
+  st.lastElementChild.textContent = D.final ? '確定' : '場中（約20分遅れ）';
+  $('#note').textContent = D.note + ` 基準日数: ${D.base_days}日。投資判断はご自身で。`;
+}
+
+// ---------- どこからどこへ
+function transitions(){
+  const W = D.windows, t = [];
+  for (let i=1;i<W.length;i++) t.push({id:i, label:`${W[i-1].label}→${W[i].label.replace('前場 ','').replace('後場 ','')}`, from:W[i-1].label, to:W[i].label, ok: W[i-1].state!=='pending' && W[i].state!=='pending'});
+  t.push({id:'half', label:'前場→後場', from:'前場', to:'後場', ok: W.slice(3).some(w=>w.state!=='pending')});
+  t.push({id:'day', label:'1日（20日平均比）', from:'過去20日平均', to:'今日', ok:true});
+  return t;
+}
+function deltas(id){
+  const S = D.sectors, W = D.windows;
+  if (id === 'day') return S.map(s=>({s, d:s.dev}));
+  if (id === 'half'){
+    const sh = idxs => { const tot = idxs.reduce((a,i)=>a+(W[i].state==='pending'?0:W[i].total),0);
+      return S.map(s => tot ? idxs.reduce((a,i)=>a+(s.values[i]||0),0)/tot*100 : 0); };
+    const a = sh([0,1,2]), b = sh([3,4,5]); return S.map((s,i)=>({s, d:b[i]-a[i]}));
+  }
+  return S.map(s => ({s, d:(s.shares[id]??0)-(s.shares[id-1]??0)}));
+}
+function renderSeg(){
+  const T = transitions();
+  if (!T.find(t=>t.id===mode)?.ok) mode = [...T].reverse().find(t=>t.ok && typeof t.id==='number')?.id ?? 'day';
+  $('#seg').innerHTML = T.map(t=>`<button data-id="${t.id}" aria-pressed="${t.id===mode}" ${t.ok?'':'disabled'}>${t.label}</button>`).join('');
+  $('#seg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const v=b.dataset.id; mode = isNaN(v)?v:+v; renderSeg(); });
+  const cur = T.find(t=>t.id===mode);
+  $('#flowhead').innerHTML = `<span>${cur.from}</span><span class="arrow">──▶</span><span>${cur.to}</span>`;
+  renderFlow();
+}
+function renderFlow(){
+  const ds = deltas(mode).filter(x=>isFinite(x.d));
+  const out = ds.filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,6);
+  const inn = ds.filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,6);
+  const max = Math.max(0.01, ...out.map(x=>-x.d), ...inn.map(x=>x.d));
+  const row = x => `<div class="frow" data-s="${x.s.name}"><div class="n">${x.s.name}</div>
+     <div class="b"><div class="bar" style="width:${Math.abs(x.d)/max*78}%"></div><span class="val">${pt(x.d)}</span></div></div>`;
+  $('#f-out').innerHTML = out.length ? out.map(row).join('') : '<p class="empty">なし</p>';
+  $('#f-in').innerHTML = inn.length ? inn.map(row).join('') : '<p class="empty">なし</p>';
+  document.querySelectorAll('.frow').forEach(r=>r.onclick=()=>openDetail(r.dataset.s, null));
+}
+
+// ---------- ヒートマップ
+function devOf(s,i){
+  const v = s.shares[i]; if (v == null) return null;
+  return v - ($('#basis').value === 'day' ? (s.day_share ?? v) : s.base);
+}
+function color(d, max){
+  const t = Math.min(1, Math.abs(d)/max), p = Math.round(Math.pow(t,0.8)*100);
+  return `color-mix(in oklab, var(${d>=0?'--in':'--out'}) ${p}%, var(--mid))`;
+}
+function renderHeat(){
+  const S = [...D.sectors], W = D.windows, sort = $('#sort').value;
+  if (sort==='dev') S.sort((a,b)=>b.dev-a.dev);
+  else if (sort==='share') S.sort((a,b)=>(b.day_share??0)-(a.day_share??0));
+  const all = S.flatMap(s=>W.map((_,i)=>devOf(s,i))).filter(v=>v!=null).map(Math.abs).sort((a,b)=>a-b);
+  const max = Math.max(0.2, all[Math.floor(all.length*0.95)] || 0.2);
+  $('#scale').textContent = `±${max.toFixed(1)}pt`;
+  let h = '<thead><tr><th class="sec"></th>' + W.map(w=>`<th title="${w.range}">${w.label.replace(' ','<br>')}</th>`).join('') + '</tr></thead><tbody>';
+  for (const s of S){
+    h += `<tr data-s="${s.name}" class="${s.name===selSector?'sel':''}"><td class="sec">${s.name}</td>`;
+    W.forEach((w,i)=>{
+      const d = devOf(s,i);
+      if (d == null) h += `<td class="c pending" data-i="${i}" aria-label="${s.name} ${w.label} 未集計"></td>`;
+      else h += `<td class="c ${s.name===selSector&&i===selWin?'sel':''}" data-i="${i}" style="background:${color(d,max)}" aria-label="${s.name} ${w.label} シェア${s.shares[i].toFixed(1)}% 基準比${pt(d)}"></td>`;
+    });
+    h += '</tr>';
+  }
+  $('#hm').innerHTML = h + '</tbody>';
+  $('#hm').querySelectorAll('tbody tr').forEach(tr=>{
+    tr.querySelector('.sec').onclick = () => openDetail(tr.dataset.s, null);
+    tr.querySelectorAll('td.c').forEach(td=>{
+      td.onclick = () => openDetail(tr.dataset.s, +td.dataset.i);
+      td.onmouseenter = e => showTip(e, td.getAttribute('aria-label'));
+      td.onmouseleave = hideTip;
+    });
+  });
+  renderTable();
+}
+function renderTable(){
+  const W = D.windows;
+  let h = '<thead><tr><th>業種</th>'+W.map(w=>`<th>${w.label.replace('前場 ','前').replace('後場 ','後')}</th>`).join('')+'<th>当日</th><th>20日平均</th><th>株価</th></tr></thead><tbody>';
+  for (const s of D.sectors){
+    h += `<tr><td>${s.name}</td>`+s.shares.map(v=>`<td>${v==null?'—':v.toFixed(1)}</td>`).join('')+
+      `<td>${s.day_share?.toFixed(1)??'—'}</td><td>${s.base.toFixed(1)}</td><td>${s.ret==null?'—':(s.ret>0?'+':'')+s.ret.toFixed(1)+'%'}</td></tr>`;
+  }
+  $('#tbl').innerHTML = h+'</tbody>';
+}
+
+// ---------- 詳細
+function openDetail(name, wi){
+  const s = D.sectors.find(x=>x.name===name); if(!s) return;
+  selSector = name; selWin = wi; renderHeat();
+  const W = D.windows;
+  if (wi == null){ wi = W.map((w,i)=>i).filter(i=>s.shares[i]!=null).pop() ?? 0; }
+  const vals = s.shares.map(v=>v), ok = vals.filter(v=>v!=null);
+  const lo = Math.min(s.base, ...ok)*0.85, hi = Math.max(s.base, ...ok)*1.1 || 1;
+  const w = 320, h = 96, px = i => 16 + i*(w-32)/5, py = v => h-18 - (v-lo)/(hi-lo)*(h-30);
+  let path = '', first = true;
+  vals.forEach((v,i)=>{ if(v==null){first=true;return;} path += (first?'M':'L')+px(i).toFixed(1)+','+py(v).toFixed(1); first=false; });
+  const svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${name}の区間別シェア推移">
+    <line x1="10" x2="${w-10}" y1="${py(s.base)}" y2="${py(s.base)}" stroke="var(--muted)" stroke-dasharray="3 3" stroke-width="1"/>
+    <text x="${w-10}" y="${py(s.base)-4}" text-anchor="end" font-size="10" fill="var(--text2)">20日平均 ${s.base.toFixed(1)}%</text>
+    <path d="${path}" fill="none" stroke="var(--text)" stroke-width="2" stroke-linejoin="round"/>
+    ${vals.map((v,i)=>v==null?'':`<circle cx="${px(i)}" cy="${py(v)}" r="${i===wi?5:3.5}" fill="${v>=s.base?'var(--in)':'var(--out)'}" stroke="var(--surface)" stroke-width="2"/>`).join('')}
+    ${W.map((x,i)=>`<text x="${px(i)}" y="${h-3}" text-anchor="middle" font-size="9.5" fill="${i===wi?'var(--text)':'var(--text2)'}">${x.label.replace('前場 ','前').replace('後場 ','後')}</text>`).join('')}
+  </svg>`;
+  const tops = s.tops[wi] || [];
+  $('#detail').innerHTML = `<div class="card">
+    <div class="top"><div><b>${name}</b> <span class="sub">${s.n}銘柄 ・ 当日シェア ${s.day_share?.toFixed(1)??'—'}%（${pt(s.dev)}）${s.ret==null?'':' ・ 株価 '+(s.ret>0?'+':'')+s.ret.toFixed(1)+'%'}</span></div>
+    <button class="x" aria-label="閉じる">×</button></div>
+    ${svg}
+    <div class="sub" style="margin-top:4px">${W[wi].label}（${W[wi].range}）の売買代金上位</div>
+    <ul class="stocks">${tops.length? tops.map(t=>`<li><span>${t[1]} <span class="sub">${t[0]}</span></span><span>${fmtYenTxt(t[2])}</span></li>`).join('') : '<li><span>データなし</span><span></span></li>'}</ul>
+  </div>`;
+  $('#detail').hidden = false;
+  $('#detail .x').onclick = () => { $('#detail').hidden = true; selSector = null; selWin = null; renderHeat(); };
+}
+
+const tip = $('#tip');
+function showTip(e, t){ if (matchMedia('(hover: none)').matches) return; tip.textContent = t; tip.style.opacity = 1;
+  const r = e.target.getBoundingClientRect(); tip.style.left = Math.min(innerWidth-230, r.left)+'px'; tip.style.top = (r.top-36)+'px'; }
+function hideTip(){ tip.style.opacity = 0; }
+
+init();
+</script>
+</body>
+</html>
