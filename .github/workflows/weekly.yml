@@ -1,0 +1,28 @@
+name: 週次 需給レポート
+
+on:
+  schedule:
+    - cron: "30 9 * * 5"   # 毎週金曜 18:30 JST
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: "Discord通知"
+        type: choice
+        options: ["off", "on"]
+        default: "off"
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas xlrd openpyxl
+      - name: 集計・通知
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_WEEKLY: ${{ secrets.DISCORD_WEBHOOK_WEEKLY }}
+        run: python scripts/weekly.py --notify ${{ inputs.notify || 'on' }}

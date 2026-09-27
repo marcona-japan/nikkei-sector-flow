@@ -13,10 +13,12 @@
 ## 追加の自動処理
 - **TDnet開示チェック**（`scripts/tdnet.py`）: `data/watchlist.csv` の監視銘柄の適時開示を平日8:00〜20:30に30分ごとにチェックしDiscordへ。一覧は `docs/tdnet.html`
 - **マーケット速報**（`scripts/ranking.py`）: ストップ高・安、出来高・売買代金上位を11:40と15:40にDiscordへ
+- **マーケット概況（日次）**（`scripts/market.py`）: 平日18:15。指数・NT倍率・日経VI・市場別売買代金・値上がり/値下がり・騰落レシオ・空売り比率・為替/金利/米国株/原油・今後1週間の予定（`data/events.json`＋SQ）
+- **週次 需給レポート**（`scripts/weekly.py`）: 金曜18:30。投資部門別売買・対内証券投資・信用残・裁定残
 
 ## 設定
 - Secrets `DISCORD_WEBHOOK_URL`: 通知先チャンネルのWebhook URL（未設定なら通知をスキップ）
-- 任意: `DISCORD_WEBHOOK_TDNET` / `DISCORD_WEBHOOK_RANKING` を登録すると、その通知だけ別チャンネルに送る
+- 任意: `DISCORD_WEBHOOK_TDNET` / `DISCORD_WEBHOOK_RANKING` / `DISCORD_WEBHOOK_MARKET` / `DISCORD_WEBHOOK_WEEKLY` を登録すると、その通知だけ別チャンネルに送る
 - 手動実行: Actions →「セクター資金移動の更新」→ Run workflow（日付・通知の有無を指定）
 
 | 区間 | 時間 |
