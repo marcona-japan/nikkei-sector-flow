@@ -18,7 +18,7 @@ on:
       line:
         description: "LINE送信"
         type: choice
-        options: [off, auto, force]
+        options: ["off", "auto", "force"]
         default: "off"
 
 permissions:
