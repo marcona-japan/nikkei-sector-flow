@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="X8wgzuvIAOQUXH9ErCXIdGT1qh13xEMLy1baJg_sDtMt6N5VszVna6gpUCDJ2vlyrLEethMZLS2HARMfQZJrBw" />
+       
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="bingbot" content="noarchive">
+    <meta name="description" content="日経の指数公式サイト。日経平均株価をはじめとした日本経済新聞社が算出、公表する指数に関する情報を提供いたします。" />
+    <meta name="keywords" content="日経平均,日経225,指数,インデックス" />
+    <title>指数情報 － 日経平均プロフィル</title>
+    
+	<!-- Google Tag Manager -->
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+	new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+	j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+	'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+	})(window,document,'script','dataLayer','GTM-NVVVBZXG');</script>
+	<!-- End Google Tag Manager -->
+    
+    <script src="/nkave/assets/jquery-3.7.1.min.js"></script>
+      <script src="/nkave/assets/jquery.ui.datepicker-ja.js"></script>
+    <script src="/nkave/assets/bootstrap.min.js"></script>
+    <script src="/nkave/assets/bootstrap.bundle.min.js"></script>
+    <script src="/nkave/assets/jquery-ui.min.js"></script>
+    <script src="/nkave/assets/jquery.colorbox-min.js"></script>
+    <script src="/nkave/assets/w2ui-1.5.rc1.min.js"></script>
+        <link rel="stylesheet" href="/nkave/assets/kite-color.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/bootstrap.min.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/bootstrap-icons.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/colorbox.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/jquery-ui.min.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/jquery.jqplot.min.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/w2ui-1.5.rc1.min.css" media="screen" />
+    <link rel="stylesheet" href="/nkave/assets/style-extend-bootstrap-style.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/style-common-parts.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/style-global.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/style-icon.css" media="screen, print" />
+    <link rel="stylesheet" href="/nkave/assets/style.css" media="screen, print" />
+    
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="hTT7EQr5sd1dSQ6oo4cMBLboWl0xHinKjfyyUiUeHRb3EAWKUgTWUuE8IczGeD0Cfqzu9lXDR-zBq3tra2B4wg" />
+    
+      
+      
+      
+        <script type="text/javascript">
+    $(document).ready(function(){
+       $("#over_ray_chart").colorbox({iframe:true, fixed:true, width:"800px", height:"550px"});
+    });
+    function onClick_submit() {
+      var form = document.forms["modal_form"];
+      form.method = "post";
+      form.action = "/nkave/index/profile/submit_modal";
+      form.submit();
+      $("#topPageModal").modal("hide");
+    };
+    function onClick_close() {
+      var form = document.forms["modal_form"];
+      form.method = "post";
+      form.action = "/nkave/index/profile/close_modal";
+      form.submit();
+      $("#topPageModal").modal("hide");
+    };
+  </script>
+
+      
+      
+      
+      
+    
+      
+      
+      
+     
+
+  </head>
+    
+  <body>
+	<!-- Google Tag Manager (noscript) -->
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NVVVBZXG"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<!-- End Google Tag Manager (noscript) -->
+
+      
+
+
+    
+  
+    
+    <div class="idx-ja">
+        
+        <!-- Sidebar -->
+        <nav class="navbar navbar-expand-lg idx-sidebar sticky-top">
+            
+            <div class="container-fluid px-0">
+                
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#gNav" aria-controls="offcanvasNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                
+                <!-- Brand -->
+                <div class="idx-brand">
+                    <a class="navbar-brand" href="/nkave">日経平均プロフィル</a>
+                    <p class="idx-tagline">日経の指数公式サイト</p>
+                </div>
+                
+                    <div class="offcanvas offcanvas-start" tabindex="-1" id="gNav" aria-labelledby="gNavLabel">
+                        
+                        <!-- Navigation header -->
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="gNavLabel">日経平均プロフィル</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        
+                        <!-- Navigation contents -->
+                        <div class="offcanvas-body">
+                            <ul class="navbar-nav justify-content-end idx-gnav">
+                                <li class="nav-item"><p class="label">指数を知る</p></li>
+                                <li class="nav-item"><a class="nav-link " href="/nkave/newsroom"><i class="idx-icon icon-news"></i>ニュース＆リリース</a></li>
+                                <li class="nav-item">
+                                    <div class="nav-item has-sub">
+                                        <span class="nav-link ">
+                                            <i class="idx-icon icon-index"></i><span>指数一覧</span>
+                                        </span>
+                                        <ul class="nav-subnav">
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/index?type=index">指数値一覧</a></li>
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/index?type=download">ダウンロードセンター</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="nav-item has-sub">
+                                        <span class="nav-link ">
+                                            <i class="idx-icon icon-archive"></i><span>日経平均アーカイブ</span>
+                                        </span>
+                                        <ul class="nav-subnav">
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/archives/summary">日次サマリー</a></li>
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/archives/data">ヒストリカルデータ</a></li>
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/archives/record">上昇・下落記録</a></li>
+                                            <li class="nav-item"><a class="nav-link " href="/nkave/archives/calendar">騰落率カレンダー</a></li>
+                                            <li class="nav-item"><a class="nav-link" href="/nkave/faq/chronology.html">日経指数年表</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="nav-item"><a class="nav-link " href="/nkave/index/search"><i class="idx-icon icon-search"></i>銘柄から指数を探す</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/nkave/governance/"><i class="idx-icon icon-governance"></i>ガバナンス</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/atoz/"><i class="idx-icon icon-document"></i>読む知る学ぶ</a></li>
+                                <li class="nav-item"><p class="label">指数を利用</p></li>
+                                <li class="nav-item"><a class="nav-link" href="/nkave/license/"><i class="idx-icon icon-license"></i>ライセンス契約</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/nkave/data/"><i class="idx-icon icon-data"></i>指数データ取得</a></li>
+                                <li class="nav-item"><p class="label">サポート</p></li>
+                                <li class="nav-item"><a class="nav-link" href="/nkave/faq/"><i class="idx-icon icon-faq"></i>よくあるご質問</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/nkave/contact/"><i class="idx-icon icon-contact"></i>お問い合わせ</a></li>
+                            </ul>
+                            
+                            <!-- Member link -->
+                            <div class="idx-member" id="member">
+                                <a class="idx-member-link" href="/nkave/service"><i class="idx-icon icon-lock"></i>&nbsp;有料会員様向けサービス</a>
+                            </div>
+                        </div>
+                    </div>
+                
+                <!-- Language switcher md -->
+                <div class="idx-lang-md">
+                    <ul class="lang-switcher lang-md">
+                            <li class="lang-switcher-item"><a href="/en/nkave/index/profile?idx=nk225vi" class="lang-switcher-link"><span>EN</span></a></li>
+                            <li class="lang-switcher-item"><a href="/cz/nkave/index/profile" class="lang-switcher-link"><span>CN</span></a></li>
+                            <li class="lang-switcher-item active"><span>JA</span></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main column -->
+        <div class="idx-main">
+            
+            
+            <nav class="idx-topbar">
+                <div class="container-fluid d-flex justify-content-between align-items-center">
+                    <!-- Breadcrumb -->
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/nkave">トップ</a></li>
+                                <li class="breadcrumb-item active">指数一覧</li>
+    <li class="breadcrumb-item active" aria-current="page">日経平均ボラティリティー・インデックス</li>
+
+                        </ol>
+                    
+                    <!-- Language switcher lg -->
+                    <div class="idx-lang-lg">
+                        <ul class="lang-switcher lang-lg">
+                                <li class="lang-switcher-item"><a href="/en/nkave/index/profile?idx=nk225vi" class="lang-switcher-link"><span>English</span></a></li>
+                                <li class="lang-switcher-item"><a href="/cz/nkave/index/profile" class="lang-switcher-link"><span>簡体中文</span></a></li>
+                                <li class="lang-switcher-item active"><span>日本語</span></li>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Page title -->
+            <header class="idx-header">
+                    
+    
+    <script type = "text/javascript">
+        $(document).ready(function() {
+        var refreshId1 = setInterval(
+        function() {
+            jQuery.get('/nkave/get_real_data', {idx:"nk225vi"}, "json")
+            .done(function(data, textStatus, jqXHR) {
+            document.getElementById("price").innerText = data["price"];
+            document.getElementById("rate").innerText = data["rate"];
+            document.getElementById("diff").innerText= data["diff"];
+            document.getElementById("updown_class").classList.remove("up", "down");
+            document.getElementById("updown_class").classList.add(data["updown_class"]);
+            document.getElementById("datedtime").innerText = data["datedtime"];
+            document.getElementById("open_price").innerText = data["open_price"];
+            document.getElementById("opentime").innerText = data["opentime"];
+            document.getElementById("high_price").innerText = data["high_price"];
+            document.getElementById("hightime").innerText = data["hightime"];
+            document.getElementById("low_price").innerText = data["low_price"];
+            document.getElementById("lowtime").innerText = data["lowtime"];
+            });
+        }
+        , 60000);
+         $.ajaxSetup({ cache: false}); 
+        })
+    </script>
+
+<div class="idx-header-pagetitle idx-individual-header">
+    <div class="container-fluid">
+        
+        <h1 class="name">日経平均ボラティリティー・インデックス</h1>
+        
+            
+            <div class="individual-value">
+                <div>
+                    <div class="current" id="price"><!--daily_changing-->20.30</div>
+                    <div class="daily-change down" id="updown_class">
+                        <span class="range" id="rate"><!--daily_changing-->-27.78%</span>
+                        <span class="change" id="diff"><!--daily_changing-->-7.81</span>
+                        <span class="date" id="datedtime">
+                                <!--daily_changing-->2026.09.25(15:50)
+                        </span>
+                    </div>
+                </div>
+                    <div class="ohl">
+                        <table class="ohl-table">
+                            <tr>
+                                <th class="label">始値</th>
+                                <td class="value" id="open_price"><!--daily_changing-->27.22</td>
+                                <td class="date" id="opentime"><!--daily_changing-->09:00</td>
+                            </tr>
+                            <tr>
+                                <th class="label">高値</th>
+                                <td class="value" id="high_price"><!--daily_changing-->27.91</td>
+                                <td class="date" id="hightime"><!--daily_changing-->12:47</td>
+                            </tr>
+                            <tr>
+                                <th class="label">安値</th>
+                                <td class="value" id="low_price"><!--daily_changing-->20.30</td>
+                                <td class="date" id="lowtime"><!--daily_changing-->15:46</td>
+                            </tr>
+                        </table>
+                    </div>
+            </div>
+            
+        
+    </div>
+</div>  
+
+    
+    <!-- Local nav -->
+    <div class="container-fluid">
+        <div class="idx-localnav">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="#section-gist">概要</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#section-related-news">関連ニュース</a></li>
+                <li class="nav-item"><a class="nav-link" href="#section-related-data">関連データ</a></li>
+            </ul>
+        </div>
+    <div>
+
+
+            </header>
+            
+            <!-- Contents -->
+            
+
+<main class="flex-lg-1 h-screen">
+    
+    <a name="section-gist" id="section-gist"></a>
+    <section class="idx-section">
+        <div class="container-fluid idx-container-thin">
+            <div class="idx-individua-info">
+                <h3  class="idx-section-heading">指数概要</h3>
+<p>
+	日経平均ボラティリティー・インデックスは、投資家が日経平均株価の将来の変動をどのように想定しているかを表した指数です。指数値が高いほど、投資家が今後、相場が大きく変動すると見込んでいることを意味します。
+</p>
+                <ul class="idx-individual-overview">
+                        <li class="overview-item">
+                            <div class="label">チャート</div>
+                            <div class="content">
+
+<!-- Individual chart -->
+<div class="idx-individual-chart">
+    
+        <div class="idx-individual-chart-body" id="intradaychart" ></div>
+
+<script type="text/javascript">
+var data_price;
+var data_prev;
+var data_time
+var chart_data;
+var ChartPlot;
+var data_label;
+
+function renderChart() {
+         chart_data = [data_price, data_prev];
+         options_done = {
+           axesDefaults:{},
+           grid: { background: '#fff',
+                   shadow: false,
+                   borderColor: '#000',
+                   gridLineColor: '#ff0000',
+           },
+           axes: {
+                 xaxis: { renderer:$.jqplot.DateAxisRenderer,
+                      ticks: data_time,
+                      tickOptions:{ 
+                              formatString: "%R",
+                              textColor: "#000",
+                              textSize: 2,
+                              fontSize: 13,
+                              showGridline: false,
+                      }
+                 },
+                 yaxis:{
+                      ticks:data_label,
+                      tickOptions:{
+                          formatString: "%'d",
+                          textColor: "#000",
+                          showGridline: true,
+                          fontSize: 13,
+                      }
+                 },
+           },
+           grid: {
+                 background: '#fff',
+                 drawBorder: false,
+                 shadow: false
+           },
+           seriesDefaults: {
+                 markerOptions: { show: false, },
+                 shadow: false,
+                 lineWidth: 1,
+                 yaxis: 'yaxis'
+           },
+           series: [
+                {
+                  color: '#4a7ebb',
+                  lineWidth: 2,
+                  showMarker: false,
+                  fill: true,
+                  fillAndStroke: true,
+                  fillAlpha: 0.4,
+                  fillColor: '#fff',
+                },
+                {
+                   color: '#ff0000',
+                  lineWidth: 1.5
+                }
+           ],
+             };
+          ChartPlot = $.jqplot('intradaychart',chart_data ,options_done);
+          ChartPlot.replot();
+    }
+
+var refreshChart = function() {
+     jQuery.get("/nkave/get_real_daily_chart",{idx:'nk225vi'}, "json")
+    .done(function(data, textStatus, jqXHR) {
+      data_price = data.price;
+      data_prev = data.prev;
+      data_label = data.label;
+      data_time = data.time;
+    }).fail (function(jqXHR, textStatus, errorThrown) {
+      data_price = [['0', '9:00'], ['0', '15:00']];
+      data_prev  = [['0', '9:00'], ['0', '15:00']];
+      data_label = ['0'];
+      data_time  = ['9:00', '10:00', '11:00', '12:00','13:00','14:00','15:00'];
+    }).always(function() {
+    renderChart(); 
+    });
+}
+
+$(document).ready(function(){
+    refreshChart();
+    var refreshId2 = setInterval(
+    function() {
+    refreshChart();
+    }, 60000)
+});
+</script>
+
+        <script class="include" type="text/javascript" src="/nkave/assets/jquery.jqplot.min.js"></script>
+        <script class="include" type="text/javascript" src="/nkave/assets/plugins/jqplot.categoryAxisRenderer"></script>
+        <script class="include" type="text/javascript" src="/nkave/assets/plugins/jqplot.pointLabels"></script>
+        <script class="include" type="text/javascript" src="/nkave/assets/plugins/jqplot.dateAxisRenderer"></script>
+        <script class="include" type="text/javascript" src="/nkave/assets/plugins/jqplot.ohlcRenderer"></script>
+        <script class="include" type="text/javascript" src="/nkave/assets/plugins/jqplot.highlighter"></script>
+    
+    <nav class="idx-individual-chart-controller">
+        <div class="btn-group" role="group" aria-label="">
+                    <button type="button" class="btn btn-outline-primary active">1d</button>
+                    <a href="/nkave/index/profile?cid=1&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">1w</a>
+                    <a href="/nkave/index/profile?cid=2&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">1m</a>
+                    <a href="/nkave/index/profile?cid=3&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">3m</a>
+                    <a href="/nkave/index/profile?cid=4&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">6m</a>
+                    <a href="/nkave/index/profile?cid=5&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">1y</a>
+                    <a href="/nkave/index/profile?cid=6&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">5y</a>
+                    <a href="/nkave/index/profile?cid=7&amp;idx=nk225vi#section-gist" class="btn btn-outline-primary">10y</a>
+        </div>
+    </nav>
+    
+</div>
+
+</div>
+                        </li>
+                    <li class="overview-item">
+	<div class="label">対象</div>
+	<div class="content">日経平均オプション</div>
+</li>
+<li class="overview-item">
+	<div class="label">対象指数</div>
+	<div class="content">日経平均株価</div>
+</li>
+<li class="overview-item">
+	<div class="label">計算方法</div>
+	<div class="content">
+		<ul>
+			<li>大阪取引所に上場している日経平均先物および日経平均オプションの価格をもとに算出</li>
+			<li>直近二限月のオプションのうち、直近限月の先物価格を基準としてOTM（アウト・オブ・ザ・マネー）となる行使価格のオプション価格をつかって、それぞれの限月のボラティリティーを求め、満期が30日になるように線形補間</li>
+		</ul>
+	</div>
+</li>
+<li class="overview-item">
+	<div class="label">計算頻度</div>
+	<div class="content">リアルタイム（15秒間隔）</div>
+</li>
+<li class="overview-item">
+	<div class="label">公表開始日</div>
+	<div class="content">2010/11/19</div>
+</li>
+<li class="overview-item">
+	<div class="label">遡及算出開始日</div>
+	<div class="content">1989/06/12</div>
+</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+        
+    
+        <!-- 関連ニュース -->
+        <a name="section-related-news" id="section-related-news"></a>
+        <section class="idx-section">
+            <div class="container-fluid idx-container-thin">
+                <h3  class="idx-section-heading">関連ニュース</h3>
+                
+                <ul class="idx-newslist">
+                    <li class="news-item">
+                    <p class="date">2025.10.03</p>
+                        <p class="file"><i class="bi bi-filetype-pdf"></i></p>
+                        <p class="news-link">
+                            <a onClick="_gaq.push(['_trackEvent', 'individualindex_JP', '.PDF', '20251003J_1.pdf'])" target="_blank" href="/nkave/archives/news/20251003J_1.pdf">
+                                IOSCO原則遵守に関する報告書の公表について
+</a>                        </p>
+                    </li>
+                    <li class="news-item">
+                    <p class="date">2025.01.20</p>
+                        <p class="file"><i class="bi bi-filetype-pdf"></i></p>
+                        <p class="news-link">
+                            <a onClick="_gaq.push(['_trackEvent', 'individualindex_JP', '.PDF', '20250120J_1.pdf'])" target="_blank" href="/nkave/archives/news/20250120J_1.pdf">
+                                日経平均VIの算出要領を改定
+</a>                        </p>
+                    </li>
+                    <li class="news-item">
+                    <p class="date">2025.01.20</p>
+                        <p class="file"><i class="bi bi-filetype-pdf"></i></p>
+                        <p class="news-link">
+                            <a onClick="_gaq.push(['_trackEvent', 'individualindex_JP', '.PDF', '20250120J_2.pdf'])" target="_blank" href="/nkave/archives/news/20250120J_2.pdf">
+                                日経平均ボラティリティー・インデックス算出要領（2025年1月27日適用予定）
+</a>                        </p>
+                    </li>
+                </ul>
+                <a class="idx-u-page-link" href="/nkave/newsroom?idx=nk225vi">関連ニュースをもっとみる</a>
+            </div>
+        </section>
+    
+    <!-- 関連データ -->
+    <a name="section-related-data" id="section-related-data"></a>
+    <section class="idx-section">
+        <div class="container-fluid idx-container-thin">
+            <h3  class="idx-section-heading">関連データ</h3>
+            <nav class="">
+                <ul class="idx-list idx-list-lg-col-2 idx-list-fileicon">
+                    
+                            
+                            
+                            <li class="list-item">
+                                <a class="list-link" href="/nkave/historical/nikkei_stock_average_vi_daily_jp.csv" target="_blank">日次データ(CSV)</a>
+                                    <span class="file"><i class="bi bi-filetype-csv"></i></span>
+                            </li>
+                            
+                            
+                            <li class="list-item">
+                                <a class="list-link" href="/nkave/historical/nikkei_stock_average_vi_monthly_jp.csv" target="_blank">月次データ(CSV)</a>
+                                    <span class="file"><i class="bi bi-filetype-csv"></i></span>
+                            </li>
+                            
+                            
+                            <li class="list-item">
+                                <a class="list-link" href="/nkave/archives/file/nikkei_stock_average_volatility_index_guidebook_jp.pdf" target="_blank">算出要領(PDF)</a>
+                                    <span class="file"><i class="bi bi-filetype-pdf"></i></span>
+                            </li>
+                            
+                            
+                            <li class="list-item">
+                                <a class="list-link" href="/nkave/factsheet?idx=nk225vi" target="_blank">ファクトシート(PDF)</a>
+                                    <span class="file"><i class="bi bi-filetype-pdf"></i></span>
+                            </li>
+                            
+                            
+                            <li class="list-item">
+                                <a class="list-link" href="/nkave/archives/faq/faq_nikkei_225_vi_jp.pdf" target="_blank">よくあるご質問(PDF)</a>
+                                    <span class="file"><i class="bi bi-filetype-pdf"></i></span>
+                            </li>
+                    
+                        <li class="list-item">
+                            <a href="/nkave/volatilitychart" id="over_ray_chart" class="list-link">
+                                ボラティリティー指標の推移
+                            </a>
+                        </li>
+                    
+                </ul>
+            </nav>
+        </div>
+    </section>
+    
+    
+    
+</main>
+
+            
+            <!-- Application -->
+                
+<aside class="idx-section idx-bg-gray">
+    <div class="container-fluid idx-application">
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+            <div class="col">
+                <div class="">
+                    <h2 class="idx-application-title">指数をもっと<br>活用していただくために</h2>
+                </div>
+            </div>
+            <div class="col">
+                <div class="">
+                    <h3 class="idx-application-subtitle">日本市場をはかる、最も信頼されるものさし</h3>
+                    <p class="idx-application-text">日本経済新聞社は、社会の変化を見据え、日本経済をさまざまな視点から切り取る指数を算出しています。日本の株式市場の指標として広く利用されるとともに、指数に連動する商品が作られ世界中で取引されています</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <img src="/nkave/assets/contract.png" class="card-img-top" alt="ライセンス契約">
+                    <div class="card-body">
+                        <h3 class="card-title">ライセンス契約</h3>
+                        <p class="card-text">日経平均株価をはじめ日本経済新聞社の各指数は日経が一切の知的財産権を保有しています。ウェブサイトやモバイルアプリでの表示のほか、日経指数データをインプットにした機械での演算処理、金融商品の組成など利用シーンに応じた手続きをご案内しています</p>
+                        <a href="/nkave/license/" class="btn btn-primary">もっと詳しく</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <img src="/nkave/assets/data_provision.png" class="card-img-top" alt="指数データの取得">
+                    <div class="card-body">
+                        <h3 class="card-title">指数データの提供</h3>
+                            <p class="card-text">日経平均株価の算出に不可欠な構成銘柄の株価や配当、指数に占める比率（ウェート）といった基本データをビジネスでお使いになる際の手続きをご案内しています</p>
+                            <a href="/nkave/data/" class="btn btn-primary">もっと詳しく</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">よくあるご質問</h3>
+                        <p class="card-text">日経平均株価をはじめ日経指数に関するものからライセンス契約、本サイトのご利用まで皆様から寄せられるご質問とその回答をご確認いただけます</p>
+                        <a href="/nkave/faq/" class="btn btn-primary">一覧を見る</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">お問い合わせ</h3>
+                            <p class="card-text">日経指数に関するご質問やビジネスでのご利用についてのご確認、本サイトへのご意見等各種窓口はこちらからお送りいただけます</p>
+                            <a href="/nkave/contact/" class="btn btn-primary">もっと詳しく</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+            
+            <!-- Footer -->
+            <footer class="idx-footer">
+                    <nav class="idx-footer-gnav">
+                        <ul class="idx-list">
+                            <li class="list-item"><a class="list-link" href="/nkave/newsroom">ニュース＆リリース</a></li>
+                            <li class="list-item has-sub">
+                                <a class="list-link" role="button" data-bs-toggle="button" style="text-decoration: none;">指数一覧</a>
+                                <div class="sub-item">
+                                    <ul>
+                                        <li class="list-item"><a class="list-link" href="/nkave/index?type=index">指数値一覧</a></li>
+                                        <li class="list-item"><a class="list-link" href="/nkave/index?type=download">ダウンロードセンター</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="list-item has-sub">
+                                <a class="list-link" role="button" data-bs-toggle="button" style="text-decoration: none;">日経平均アーカイブ</a>
+                                <div class="sub-item">
+                                    <ul>
+                                        <li class="list-item"><a class="list-link" href="/nkave/archives/summary">日次サマリー</a></li>
+                                        <li class="list-item"><a class="list-link" href="/nkave/archives/data">ヒストリカルデータ</a></li>
+                                        <li class="list-item"><a class="list-link" href="/nkave/archives/record">上昇・下落記録</a></li>
+                                        <li class="list-item"><a class="list-link" href="/nkave/archives/calendar">騰落率カレンダー</a></li>
+                                        <li class="list-item"><a class="list-link" href="/nkave/faq/chronology.html">日経指数年表</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="list-item"><a class="list-link" href="/nkave/index/search">銘柄から指数を探す</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/governance/">ガバナンス</a></li>
+                            <li class="list-item"><a class="list-link" href="/atoz/">読む知る学ぶ</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/license/">ライセンス契約</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/data/">指数データ取得</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/faq/">よくあるご質問</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/contact/">お問い合わせ</a></li>
+                        </ul>
+                    </nav>
+                <nav>
+                    <ul class="idx-list idx-lg-list-flat idx-list-col-2">
+                            <li class="list-item"><a class="list-link" href="/nkave/sitemap">サイトマップ</a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/archives/file/terms_of_use_jp.pdf"  onclick="_gaq.push(['_trackEvent', 'individualindex_JP', '.PDF', 'terms_of_use_jp.pdf'])" target="_blank">利用規約</a></li>
+                            <li class="list-item"><a class="list-link" href="https://www.nikkei.com/lounge/privacy/privacy.html" target="_blank">プライバシーポリシー&nbsp;<i class="bi bi-box-arrow-up-right"></i></a></li>
+                        
+                            <li class="list-item"><a class="list-link" href="https://www.nikkei.com/lounge/privacy/cookie/policy.html" target="_blank">クッキーポリシー&nbsp;<i class="bi bi-box-arrow-up-right"></i></a></li>
+                        <li class="list-item"><a class="list-link" href="https://www.nikkei.com/lounge/privacy/cookie/optout.html#nikkeipdp" target="_blank">外部送信&nbsp;<i class="bi bi-box-arrow-up-right"></i></a></li>
+                            <li class="list-item"><a class="list-link" href="/nkave/archives/file/users_guide_jp.pdf" onclick="_gaq.push(['_trackEvent', 'individualindex_JP', '.PDF', 'users_guide_jp.pdf'])" target="_blank">ユーザーズ・ガイド</a></li>
+                    </ul>
+                    <ul class="idx-list idx-lg-list-flat idx-list-col-2">
+                            <li class="list-item"><a class="list-link" href="http://www.nikkei.com/" target="_blank">日経電子版&nbsp;<i class="bi bi-box-arrow-up-right"></i></a></li>
+                            <li class="list-item"><a class="list-link" href="https://www.nikkei.co.jp/nikkeiinfo/" target="_blank">日本経済新聞社&nbsp;<i class="bi bi-box-arrow-up-right"></i></a></li>
+                    </ul>
+                </nav>
+                <p class="idx-copyright">
+                    <span class="idx-copyright-brand"><img src="/nkave/assets/cmn_logo_nikkei_01.svg" alt="Nikkei Inc."></span>
+                    <span>No reproduction without permission.</span>
+                </p>
+            </footer>
+            
+            <!--  Utility -->
+            <div class="idx-back-to-top">
+                <a class="idx-back-to-top-link" href="#"><i class="bi bi-arrow-up"></i></a>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-28645102-1']);
+      _gaq.push(['_gat._anonymizeIp']);
+      _gaq.push(['_trackPageview']);
+      
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+      
+      // bfcache対策
+      window.onpageshow = function(event) {
+        if (event.persisted) {
+          window.location.reload();
+        }
+      };
+      
+      // divlinkのホバー時にアンダーラインをつける
+      $("div.divlink").hover(function(){
+        $(this).addClass("divlink-hover");
+        $("div",this).addClass("divlink-hover");
+      },function(){
+        if($(this).hasClass("divlink-hover")){
+          $(this).removeClass("divlink-hover");
+          $("div",this).removeClass("divlink-hover");
+        }
+      });
+    </script>
+    
+  </body>
+
+</html>
+
