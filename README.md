@@ -11,7 +11,7 @@
 - 株価・出来高: Yahoo Finance（約20分遅れ）。売買代金は5分足の (高+安+終)/3 × 出来高 で概算
 
 ## 追加の自動処理
-- **TDnet開示チェック**（`scripts/tdnet.py`）: `data/watchlist.csv` の監視銘柄の適時開示を平日8:00〜20:30に30分ごとにチェックしDiscordへ。一覧は `docs/tdnet.html`
+- **TDnet開示チェック**（`scripts/tdnet.py`）: `data/watchlist.csv` の監視銘柄の適時開示を平日8:00〜20:30の毎時:02/:07/:32/:37（15:00〜16:55は5分おき）にチェックしDiscordへ。一覧は `docs/tdnet.html`
 - **マーケット速報**（`scripts/ranking.py`）: ストップ高・安、出来高・売買代金上位を11:40と15:40にDiscordへ
 - **マーケット概況（日次）**（`scripts/market.py`）: 平日18:15。指数・NT倍率・日経VI・市場別売買代金・値上がり/値下がり・騰落レシオ・空売り比率・為替/金利/米国株/原油・今後1週間の予定（`data/events.json`＋SQ）
 - **週次 需給レポート**（`scripts/weekly.py`）: 金曜18:30。投資部門別売買・対内証券投資・信用残・裁定残
