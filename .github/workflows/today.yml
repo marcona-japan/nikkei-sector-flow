@@ -10,6 +10,10 @@ on:
         type: choice
         options: ["off", "on"]
         default: "off"
+      date:
+        description: "対象日 YYYY-MM-DD（空欄=今日）"
+        type: string
+        default: ""
 
 jobs:
   today:
@@ -25,4 +29,4 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_WEBHOOK_MARKET: ${{ secrets.DISCORD_WEBHOOK_MARKET }}
-        run: python scripts/today.py --notify ${{ inputs.notify || 'on' }}
+        run: python scripts/today.py --notify ${{ inputs.notify || 'on' }} ${{ inputs.date && format('--date {0}', inputs.date) || '' }}

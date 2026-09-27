@@ -10,6 +10,10 @@ on:
         type: choice
         options: ["off", "on"]
         default: "off"
+      test:
+        description: "テスト送信（次の指標のリマインドを今すぐ送る）"
+        type: boolean
+        default: false
 
 jobs:
   prealert:
@@ -29,4 +33,4 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_WEBHOOK_MARKET: ${{ secrets.DISCORD_WEBHOOK_MARKET }}
-        run: python scripts/prealert.py --notify ${{ inputs.notify || 'on' }}
+        run: python scripts/prealert.py --notify ${{ inputs.notify || 'on' }} ${{ inputs.test && '--test' || '' }}

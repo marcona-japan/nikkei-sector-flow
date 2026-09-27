@@ -72,7 +72,22 @@ def main() -> None:
     ap.add_argument("--notify", choices=["on", "off"], default="on")
     ap.add_argument("--min-imp", type=int, default=2)
     ap.add_argument("--now", help="テスト用 'YYYY-MM-DD HH:MM'（JST）。指定時は待たない")
+    ap.add_argument("--test", action="store_true", help="次の対象イベントのリマインドを今すぐ[テスト]として送る")
     a = ap.parse_args()
+    if a.test:
+        now = datetime.now(JST)
+        nxt = [(t, e) for t, e in events_at(a.min_imp) if t > now]
+        if not nxt:
+            print("今後の対象イベントなし")
+            return
+        t0 = nxt[0][0]
+        content, embed = message(t0, [e for t, e in nxt if t == t0])
+        content = "【テスト送信】" + content
+        embed["title"] = f"【テスト】{t0:%m/%d} " + embed["title"]
+        print(content)
+        if a.notify == "on":
+            notify.send([embed], "指標リマインド", "market", content=content)
+        return
     test = bool(a.now)
     now = datetime.strptime(a.now, "%Y-%m-%d %H:%M").replace(tzinfo=JST) if test else datetime.now(JST)
     slot = nominal_slot(now)
