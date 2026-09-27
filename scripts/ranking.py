@@ -159,6 +159,103 @@ def fetch(key: str) -> tuple[list[dict], int | None]:
     return rows, total
 
 
+# ---------------------------------------------------------------- IPO（当月分）
+IPO_URL = "https://www.jpx.co.jp/listing/stocks/new/index.html"
+
+
+def _txt(h: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h)).strip()
+
+
+def ipo_list() -> list[dict]:
+    """JPX 新規上場会社情報ページから (上場日, 会社名, コード, 市場, 公開価格/仮条件, テクニカル上場か)"""
+    html = requests.get(IPO_URL, headers=UA, timeout=30).text
+    rows = re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S)
+    out = []
+    for i, r in enumerate(rows[:-1]):
+        d = re.search(r"(\d{4})/(\d{2})/(\d{2})", r)
+        code = re.search(r'<span id="([0-9][0-9A-Z]{3})"', r)
+        if not (d and code and 'rowspan="2"' in r):
+            continue
+        tds = re.findall(r"<td[^>]*>(.*?)</td>", r, re.S)
+        cells = [_txt(t) for t in tds]
+        name = clean(cells[1].replace("代表者インタビュー", "").replace("（株）", "").replace("(株)", ""))
+        tech = "*" in name
+        nxt = [_txt(t) for t in re.findall(r"<td[^>]*>(.*?)</td>", rows[i + 1], re.S)]
+        # 1行目: 上場日/会社名/コード/概要/確認書/仮条件/公募/売買単位　2行目: 市場/Iの部/CG/公開価格/売出/決算短信
+        cond = re.sub(r"（注\d+）", "", cells[5]).strip() if len(cells) > 5 else ""
+        price = re.sub(r"（注\d+）", "", nxt[3]).strip() if len(nxt) > 3 else ""
+        out.append({"date": date(int(d.group(1)), int(d.group(2)), int(d.group(3))),
+                    "name": name.replace("*", "").strip(), "code": code.group(1), "market": nxt[0] if nxt else "",
+                    "price": price if price not in ("", "-") else "", "cond": cond if cond not in ("", "-") else "",
+                    "tech": tech})
+    return out
+
+
+def ipo_fields(today: date) -> list[dict]:
+    try:
+        ipos = [x for x in ipo_list() if x["date"].year == today.year and x["date"].month == today.month]
+    except Exception as e:  # noqa: BLE001
+        print("IPO取得失敗:", e)
+        return []
+    listed = [x for x in ipos if x["date"] <= today]
+    coming = [x for x in ipos if x["date"] > today]
+    fields = []
+    if listed:
+        quotes = {}
+        try:
+            import yfinance as yf
+            df = yf.download([f"{x['code']}.T" for x in listed], period="2mo", interval="1d",
+                             progress=False, auto_adjust=False, group_by="ticker")
+            for x in listed:
+                t = f"{x['code']}.T"
+                sub = df[t] if len(listed) > 1 else df
+                sub = sub.dropna(subset=["Close"])
+                sub = sub[sub.index.date >= x["date"]]
+                if len(sub):
+                    quotes[x["code"]] = {"open1": float(sub["Open"].iloc[0]), "close": float(sub["Close"].iloc[-1]),
+                                         "prev": float(sub["Close"].iloc[-2]) if len(sub) > 1 else None}
+        except Exception as e:  # noqa: BLE001
+            print("IPO株価取得失敗:", e)
+        ls = []
+        for x in sorted(listed, key=lambda x: x["date"]):
+            q = quotes.get(x["code"])
+            ipo_p = _num(x["price"])
+            head = f"{x['date'].month}/{x['date'].day} `{x['code']}` {x['name'][:12]}（{x['market'][:2]}）"
+            if q and ipo_p:
+                chg = f" 前日比{(q['close'] / q['prev'] - 1) * 100:+.1f}%" if q.get("prev") else ""
+                ls.append(f"{head}\n　公開{ipo_p:,.0f} → 初値{q['open1']:,.0f}（{(q['open1'] / ipo_p - 1) * 100:+.0f}%）"
+                          f" → 現在{q['close']:,.0f}（公開比{(q['close'] / ipo_p - 1) * 100:+.0f}%）{chg}")
+            elif x["tech"]:
+                cur = f" 現在{q['close']:,.0f}" if q else ""
+                ls.append(f"{head} テクニカル上場{cur}")
+            else:
+                ls.append(f"{head} 公開価格{x['price'] or '—'}")
+        value = "\n".join(ls)
+        while len(value) > 1024:
+            ls = ls[:-1]
+            value = "\n".join(ls + ["…"])
+        fields.append({"name": f"🆕 今月上場したIPO（{len(listed)}社）", "value": value, "inline": False})
+    if coming:
+        ls = []
+        for x in sorted(coming, key=lambda x: x["date"]):
+            if x["tech"]:
+                p = "テクニカル上場（公募なし）"
+            elif x["price"]:
+                p = f"公開価格 {x['price']}円"
+            elif x["cond"]:
+                p = f"仮条件 {x['cond']}円"
+            else:
+                p = "仮条件未定"
+            tech = ""
+            ls.append(f"{x['date'].month}/{x['date'].day}({'月火水木金土日'[x['date'].weekday()]}) `{x['code']}` "
+                      f"{x['name'][:14]}（{x['market']}）{tech} {p}")
+        fields.append({"name": f"📅 今月のIPO予定（{len(coming)}社）", "value": "\n".join(ls)[:1024], "inline": False})
+    elif ipos:
+        fields.append({"name": "📅 今月のIPO予定", "value": "今月の上場予定は以上です", "inline": False})
+    return fields
+
+
 def line(r: dict) -> str:
     p = "" if r["price"] is None else f" {r['price']:,.0f}円" if r["price"] >= 100 else f" {r['price']:,.1f}円"
     c = "" if r.get("pct") is None else f" ({r['pct']:+.2f}%)"
@@ -207,6 +304,7 @@ def main() -> None:
         head = f"■{title}" + (f" {cnt}社" if title.startswith("ストップ") else "")
         fields.append({"name": head, "value": value, "inline": False})
 
+    fields += ipo_fields(now.date())
     embed = {"title": f"📋 日経マーケット速報 {now.month}/{now.day}({wd}) {label}",
              "color": 0x0B0B0B, "fields": fields,
              "footer": {"text": "Yahoo!ファイナンス ランキング（全市場）より"}}
