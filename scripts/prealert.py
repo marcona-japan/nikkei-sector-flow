@@ -1,4 +1,4 @@
-"""★★★指標の15分前リマインド（Discord）。
+"""★★以上の指標の15分前リマインド（Discord）。
 
 GitHub Actions の定時実行は数分〜十数分遅れるため、毎時 :05 と :35 に起動し、
 担当枠（起動枠+25分〜+55分）に通知時刻が入るイベントまで runner 内で待ってから送る。
@@ -53,11 +53,11 @@ def message(t: datetime, group: list[dict]) -> tuple[str, dict]:
         for pr in PAIRS.get(e.get("ccy", ""), "").split("・"):
             if pr and pr not in pairs:
                 pairs.append(pr)
-    lines = [f"{'★' * e.get('imp', 2)} **{e['title']}** `{e.get('ccy', '')}`" for e in group]
+    lines = [f"{'★' * e.get('imp', 2) + '☆' * (3 - e.get('imp', 2))} **{e['title']}** `{e.get('ccy', '')}`" for e in group]
     embed = {
         "title": f"⏰ {t:%H:%M} 発表まであと15分",
         "description": "\n".join(lines),
-        "color": 0xE74C3C,
+        "color": 0xE74C3C if any(e.get("imp", 2) >= 3 for e in group) else 0xF1C40F,
         "fields": [
             {"name": "影響", "value": "・".join(pairs) or "—", "inline": False},
             {"name": "確認", "value": "ポジション量・逆指値／発表直後のスプレッド拡大・急変に注意", "inline": False},
@@ -70,7 +70,7 @@ def message(t: datetime, group: list[dict]) -> tuple[str, dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--notify", choices=["on", "off"], default="on")
-    ap.add_argument("--min-imp", type=int, default=3)
+    ap.add_argument("--min-imp", type=int, default=2)
     ap.add_argument("--now", help="テスト用 'YYYY-MM-DD HH:MM'（JST）。指定時は待たない")
     a = ap.parse_args()
     test = bool(a.now)
