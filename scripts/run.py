@@ -99,6 +99,28 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
     it["value"] = (it["high"] + it["low"] + it["close"]) / 3 * it["volume"]
     it["min"] = it["ts"].dt.hour * 60 + it["ts"].dt.minute
 
+    # 5分足には引けの板寄せ（クロージング・オークション）が入らないことがあるため、
+    # 引け後は日足の売買代金との差額を「大引け」区間に上乗せする
+    after_close = now.date() > target or (now.hour * 60 + now.minute) >= hm("15:30") + DELAY_MIN
+    closing_added = 0.0
+    if after_close:
+        td = daily[daily["date"] == target].copy()
+        if not td.empty:
+            dv = (td["close"] * td["volume"]).groupby(td["code"]).sum()
+            iv = it.groupby("code")["value"].sum()
+            gap = (dv - iv.reindex(dv.index).fillna(0)).clip(lower=0)
+            gap = gap[gap > 0]
+            if len(gap):
+                last = td.set_index("code")["close"]
+                add = pd.DataFrame({
+                    "ts": pd.Timestamp(f"{target} 15:30", tz=JST), "code": gap.index,
+                    "close": last.reindex(gap.index).values, "value": gap.values,
+                })
+                add["sector"] = add["code"].map(sec_of)
+                add["min"] = hm("15:30")
+                it = pd.concat([it, add.dropna(subset=["sector"])], ignore_index=True)
+                closing_added = float(gap.sum())
+
     # 基準: 過去20営業日の業種別シェア平均
     dd = daily[daily["date"] < target].copy()
     dd["sector"] = dd["code"].map(sec_of)
@@ -169,6 +191,7 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
         "day_total": round(day_tot),
         "windows": windows,
         "sectors": out_sectors,
+        "closing_added": round(closing_added),
         "note": "売買代金はYahoo Financeの5分足から概算（約20分遅れ）。基準は過去20営業日の業種別シェア平均。",
     }
 
@@ -199,8 +222,8 @@ def line_text(d: dict) -> str:
     secs = [s for s in d["sectors"] if s["day_share"] is not None]
     for s in secs:
         s["_dev"] = s["day_share"] - s["base"]
-    up = sorted(secs, key=lambda s: -s["_dev"])[:5]
-    dn = sorted(secs, key=lambda s: s["_dev"])[:5]
+    up = [s for s in sorted(secs, key=lambda s: -s["_dev"]) if s["_dev"] >= 0.05][:5]
+    dn = [s for s in sorted(secs, key=lambda s: s["_dev"]) if s["_dev"] <= -0.05][:5]
 
     def row(i, s):
         r = "" if s["ret"] is None else f" 株価{s['ret']:+.1f}%"
