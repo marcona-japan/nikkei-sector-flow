@@ -10,6 +10,7 @@ import io
 import json
 import re
 import sys
+import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -53,6 +54,12 @@ def _num(s) -> float | None:
         return None
 
 
+def clean(name: str) -> str:
+    n = unicodedata.normalize("NFKC", name)
+    n = re.sub(r"\(株\)|（株）|株式会社", "", n)
+    return n.strip()
+
+
 def _walk(o):
     if isinstance(o, dict):
         yield o
@@ -80,17 +87,24 @@ def parse_state(html: str) -> list[dict]:
                 code_k = next((k for k in keys if k.lower() in ("stockcode", "code", "symbol")), None)
                 if code_k and any(k.lower() in ("stockname", "name") for k in keys) and len(v) > len(best):
                     best = v
+    if best:
+        print("  列:", {k: (v if not isinstance(v, (dict, list)) else type(v).__name__) for k, v in best[0].items()})
     rows = []
     for r in best:
         k = {x.lower(): x for x in r}
         code = str(r.get(k.get("stockcode") or k.get("code") or k.get("symbol"), "")).split(".")[0].upper()
         name = r.get(k.get("stockname") or k.get("name"), "")
-        price = r.get(k.get("saveprice") or k.get("price") or k.get("currentprice"), None)
-        pct = r.get(k.get("changepricerate") or k.get("changerate") or k.get("pricechangerate"), None)
+        pk = next((k[x] for x in k if x in ("saveprice", "price", "currentprice")), None) or \
+            next((k[x] for x in k if "price" in x and "change" not in x and "rate" not in x), None)
+        ck = next((k[x] for x in k if ("rate" in x or "ratio" in x or "percent" in x) and "change" in x), None) or \
+            next((k[x] for x in k if x.endswith("rate") or "percent" in x), None)
+        price, pct = (r.get(pk) if pk else None), (r.get(ck) if ck else None)
         if isinstance(price, dict):
             price = price.get("price") or price.get("value")
+        if isinstance(pct, dict):
+            pct = pct.get("rate") or pct.get("value")
         if CODE_RE.match(code):
-            rows.append({"code": code, "name": str(name), "price": _num(price), "pct": _num(pct)})
+            rows.append({"code": code, "name": clean(str(name)), "price": _num(price), "pct": _num(pct)})
     return rows
 
 
@@ -115,7 +129,7 @@ def parse_table(html: str) -> list[dict]:
             pct = re.search(r"([+\-]?\d+(?:\.\d+)?)\s*%", text)
             nums = [n for n in (_num(c) for c in cells) if n is not None]
             price = next((n for n in nums if n and n > 1 and str(int(n)) != code), None)
-            rows.append({"code": code, "name": name[:20], "price": price,
+            rows.append({"code": code, "name": clean(name)[:20], "price": price,
                          "pct": float(pct.group(1)) if pct else None})
         if len(rows) >= 3:
             return rows
