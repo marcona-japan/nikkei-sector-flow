@@ -1,0 +1,191 @@
+//@version=6
+// セクター資金移動（場中）
+// 17業種 × 代表2銘柄の売買代金（終値×出来高）から、
+// 「直近◯分の業種シェア」が「当日平均シェア」からどれだけずれたか（pt）を表示する。
+// 赤＝直近で資金が集まっている業種、青＝抜けている業種。
+// 1〜15分足の東証銘柄・指数チャートに表示して使う（日経225先物や1321などのチャート推奨）。
+indicator("セクター資金移動（場中）", shorttitle = "資金移動", overlay = false)
+
+// ───────── 設定
+windowMin = input.int(30, "直近の集計時間（分）", minval = 5, step = 5, group = "表示")
+alertPt   = input.float(3.0, "アラート：当日比がこのpt以上で流入通知", minval = 0.5, step = 0.5, group = "アラート")
+showTable = input.bool(true, "一覧表を表示", group = "表示")
+tablePos  = input.string("右上", "一覧表の位置", options = ["右上", "右下", "左上", "左下"], group = "表示")
+plotSel   = input.string("電機・精密", "線で表示する業種",
+     options = ["食品", "エネルギー", "建設・資材", "素材・化学", "医薬品", "自動車・輸送機", "鉄鋼・非鉄", "機械",
+                "電機・精密", "情報通信・他", "電力・ガス", "運輸・物流", "商社・卸売", "小売", "銀行", "金融(除銀行)", "不動産"],
+     group = "表示")
+
+g1  = "01 食品"
+g2  = "02 エネルギー"
+g3  = "03 建設・資材"
+g4  = "04 素材・化学"
+g5  = "05 医薬品"
+g6  = "06 自動車・輸送機"
+g7  = "07 鉄鋼・非鉄"
+g8  = "08 機械"
+g9  = "09 電機・精密"
+g10 = "10 情報通信・サービス他"
+g11 = "11 電力・ガス"
+g12 = "12 運輸・物流"
+g13 = "13 商社・卸売"
+g14 = "14 小売"
+g15 = "15 銀行"
+g16 = "16 金融（除く銀行）"
+g17 = "17 不動産"
+
+s1a  = input.symbol("TSE:2914", "銘柄1", group = g1,  inline = g1)
+s1b  = input.symbol("TSE:2802", "銘柄2", group = g1,  inline = g1)
+s2a  = input.symbol("TSE:5020", "銘柄1", group = g2,  inline = g2)
+s2b  = input.symbol("TSE:1605", "銘柄2", group = g2,  inline = g2)
+s3a  = input.symbol("TSE:1925", "銘柄1", group = g3,  inline = g3)
+s3b  = input.symbol("TSE:1801", "銘柄2", group = g3,  inline = g3)
+s4a  = input.symbol("TSE:4063", "銘柄1", group = g4,  inline = g4)
+s4b  = input.symbol("TSE:4901", "銘柄2", group = g4,  inline = g4)
+s5a  = input.symbol("TSE:4502", "銘柄1", group = g5,  inline = g5)
+s5b  = input.symbol("TSE:4568", "銘柄2", group = g5,  inline = g5)
+s6a  = input.symbol("TSE:7203", "銘柄1", group = g6,  inline = g6)
+s6b  = input.symbol("TSE:7267", "銘柄2", group = g6,  inline = g6)
+s7a  = input.symbol("TSE:5401", "銘柄1", group = g7,  inline = g7)
+s7b  = input.symbol("TSE:5803", "銘柄2", group = g7,  inline = g7)
+s8a  = input.symbol("TSE:6301", "銘柄1", group = g8,  inline = g8)
+s8b  = input.symbol("TSE:7011", "銘柄2", group = g8,  inline = g8)
+s9a  = input.symbol("TSE:8035", "銘柄1", group = g9,  inline = g9)
+s9b  = input.symbol("TSE:6857", "銘柄2", group = g9,  inline = g9)
+s10a = input.symbol("TSE:9984", "銘柄1", group = g10, inline = g10)
+s10b = input.symbol("TSE:6098", "銘柄2", group = g10, inline = g10)
+s11a = input.symbol("TSE:9501", "銘柄1", group = g11, inline = g11)
+s11b = input.symbol("TSE:9503", "銘柄2", group = g11, inline = g11)
+s12a = input.symbol("TSE:9022", "銘柄1", group = g12, inline = g12)
+s12b = input.symbol("TSE:9101", "銘柄2", group = g12, inline = g12)
+s13a = input.symbol("TSE:8058", "銘柄1", group = g13, inline = g13)
+s13b = input.symbol("TSE:8001", "銘柄2", group = g13, inline = g13)
+s14a = input.symbol("TSE:9983", "銘柄1", group = g14, inline = g14)
+s14b = input.symbol("TSE:3382", "銘柄2", group = g14, inline = g14)
+s15a = input.symbol("TSE:8306", "銘柄1", group = g15, inline = g15)
+s15b = input.symbol("TSE:8316", "銘柄2", group = g15, inline = g15)
+s16a = input.symbol("TSE:8766", "銘柄1", group = g16, inline = g16)
+s16b = input.symbol("TSE:8604", "銘柄2", group = g16, inline = g16)
+s17a = input.symbol("TSE:8801", "銘柄1", group = g17, inline = g17)
+s17b = input.symbol("TSE:8802", "銘柄2", group = g17, inline = g17)
+
+// ───────── 共通処理
+newDay = timeframe.change("D")
+barMin = timeframe.in_seconds() / 60.0
+winLen = math.max(1, int(math.round(windowMin / barMin)))
+
+// 銘柄の [売買代金, 当日騰落率%]
+stock(simple string sym) =>
+    [v, c, o] = request.security(sym, timeframe.period, [close * volume, close, open], ignore_invalid_symbol = true)
+    var float dayOpen = na
+    if newDay or na(dayOpen)
+        dayOpen := o
+    pct = na(c) or na(dayOpen) or dayOpen == 0 ? na : (c / dayOpen - 1) * 100
+    [nz(v), pct]
+
+// 当日累計（寄り付きからリセット）
+dayCum(float x) =>
+    var float acc = 0.0
+    if newDay
+        acc := 0.0
+    acc += x
+    acc
+
+// 業種 = 2銘柄合計。[直近窓の売買代金, 当日累計, 騰落率平均]
+sector(simple string a, simple string b) =>
+    [va, pa] = stock(a)
+    [vb, pb] = stock(b)
+    v = va + vb
+    pct = na(pa) ? pb : na(pb) ? pa : (pa + pb) / 2
+    [math.sum(v, winLen), dayCum(v), pct]
+
+[w1,  d1,  p1 ] = sector(s1a,  s1b)
+[w2,  d2,  p2 ] = sector(s2a,  s2b)
+[w3,  d3,  p3 ] = sector(s3a,  s3b)
+[w4,  d4,  p4 ] = sector(s4a,  s4b)
+[w5,  d5,  p5 ] = sector(s5a,  s5b)
+[w6,  d6,  p6 ] = sector(s6a,  s6b)
+[w7,  d7,  p7 ] = sector(s7a,  s7b)
+[w8,  d8,  p8 ] = sector(s8a,  s8b)
+[w9,  d9,  p9 ] = sector(s9a,  s9b)
+[w10, d10, p10] = sector(s10a, s10b)
+[w11, d11, p11] = sector(s11a, s11b)
+[w12, d12, p12] = sector(s12a, s12b)
+[w13, d13, p13] = sector(s13a, s13b)
+[w14, d14, p14] = sector(s14a, s14b)
+[w15, d15, p15] = sector(s15a, s15b)
+[w16, d16, p16] = sector(s16a, s16b)
+[w17, d17, p17] = sector(s17a, s17b)
+
+names = array.from("食品", "エネルギー", "建設・資材", "素材・化学", "医薬品", "自動車・輸送機", "鉄鋼・非鉄", "機械",
+     "電機・精密", "情報通信・他", "電力・ガス", "運輸・物流", "商社・卸売", "小売", "銀行", "金融(除銀行)", "不動産")
+wArr = array.from(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15, w16, w17)
+dArr = array.from(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17)
+pArr = array.from(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17)
+
+wTot = array.sum(wArr)
+dTot = array.sum(dArr)
+shareW = array.new_float(17, na)
+delta  = array.new_float(17, na)
+for i = 0 to 16
+    sw = wTot > 0 ? array.get(wArr, i) / wTot * 100 : na
+    sd = dTot > 0 ? array.get(dArr, i) / dTot * 100 : na
+    array.set(shareW, i, sw)
+    array.set(delta, i, na(sw) or na(sd) ? na : sw - sd)
+
+// ───────── 線：選んだ業種の当日比（pt）と、流入トップ／流出トップ
+selIdx = array.indexof(names, plotSel)
+selDelta = selIdx >= 0 ? array.get(delta, selIdx) : na
+maxDelta = array.max(delta)
+minDelta = array.min(delta)
+
+plot(selDelta, "選択業種の当日比(pt)", color = selDelta >= 0 ? color.new(#d03b3b, 0) : color.new(#2a78d6, 0),
+     style = plot.style_columns, linewidth = 2)
+plot(maxDelta, "流入トップの当日比(pt)", color = color.new(#d03b3b, 50), linewidth = 1)
+plot(minDelta, "流出トップの当日比(pt)", color = color.new(#2a78d6, 50), linewidth = 1)
+hline(0, "0", color = color.new(color.gray, 50))
+hline(alertPt, "アラート基準", color = color.new(#d03b3b, 70), linestyle = hline.style_dotted)
+
+// ───────── 一覧表（当日比の大きい順）
+pos = tablePos == "右上" ? position.top_right : tablePos == "右下" ? position.bottom_right :
+     tablePos == "左上" ? position.top_left : position.bottom_left
+var table tb = table.new(pos, 4, 19, border_width = 1, frame_color = color.new(color.gray, 70),
+     frame_width = 1, bgcolor = color.new(color.black, 85))
+
+if showTable and barstate.islast
+    txt = color.new(color.white, 0)
+    table.cell(tb, 0, 0, "業種", text_color = txt, text_size = size.small)
+    table.cell(tb, 1, 0, "直近" + str.tostring(windowMin) + "分", text_color = txt, text_size = size.small)
+    table.cell(tb, 2, 0, "当日比", text_color = txt, text_size = size.small)
+    table.cell(tb, 3, 0, "騰落", text_color = txt, text_size = size.small)
+    idx = array.sort_indices(delta, order.descending)
+    for r = 0 to 16
+        i = array.get(idx, r)
+        dl = array.get(delta, i)
+        sw = array.get(shareW, i)
+        pc = array.get(pArr, i)
+        strength = na(dl) ? 90 : math.max(20, 90 - math.abs(dl) * 12)
+        bg = na(dl) ? color.new(color.gray, 90) : dl >= 0 ? color.new(#d03b3b, strength) : color.new(#2a78d6, strength)
+        table.cell(tb, 0, r + 1, array.get(names, i), text_color = txt, text_size = size.small, text_halign = text.align_left)
+        table.cell(tb, 1, r + 1, na(sw) ? "-" : str.tostring(sw, "0.0") + "%", text_color = txt, text_size = size.small)
+        table.cell(tb, 2, r + 1, na(dl) ? "-" : (dl >= 0 ? "+" : "") + str.tostring(dl, "0.0") + "pt",
+             text_color = txt, bgcolor = bg, text_size = size.small)
+        table.cell(tb, 3, r + 1, na(pc) ? "-" : (pc >= 0 ? "+" : "") + str.tostring(pc, "0.0") + "%",
+             text_color = na(pc) ? txt : pc >= 0 ? color.new(#ff8a8a, 0) : color.new(#8ab8ff, 0), text_size = size.small)
+    table.cell(tb, 0, 18, "赤=資金流入 青=流出（当日平均シェア比）", text_color = color.new(color.gray, 20),
+         text_size = size.tiny, text_halign = text.align_left)
+    table.merge_cells(tb, 0, 18, 3, 18)
+
+// ───────── アラート（「alert()関数の呼び出し」で設定）
+var float[] prevDelta = array.new_float(17, na)
+if barstate.isconfirmed
+    msg = ""
+    for i = 0 to 16
+        dl = array.get(delta, i)
+        pv = array.get(prevDelta, i)
+        if not na(dl) and dl >= alertPt and (na(pv) or pv < alertPt)
+            msg += array.get(names, i) + " +" + str.tostring(dl, "0.0") + "pt  "
+        array.set(prevDelta, i, dl)
+    if msg != "" and not newDay
+        alert("資金流入: " + msg + "（直近" + str.tostring(windowMin) + "分の業種シェアが当日平均より増加）",
+             alert.freq_once_per_bar_close)
