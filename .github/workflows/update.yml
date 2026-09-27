@@ -8,15 +8,15 @@ on:
     - cron: "50 2 * * 1-5"   # 11:50 JST 前場 引け
     - cron: "20 4 * * 1-5"   # 13:20 JST 後場 寄り
     - cron: "20 6 * * 1-5"   # 15:20 JST 後場 中盤
-    - cron: "0 7 * * 1-5"    # 16:00 JST 大引け確定＋LINE
-    - cron: "40 7 * * 1-5"   # 16:40 JST 予備（LINE未送信のときだけ送る）
+    - cron: "0 7 * * 1-5"    # 16:00 JST 大引け確定＋Discord通知
+    - cron: "40 7 * * 1-5"   # 16:40 JST 予備（未通知のときだけ送る）
   workflow_dispatch:
     inputs:
       date:
         description: "集計日 YYYY-MM-DD（空欄＝今日）"
         required: false
-      line:
-        description: "LINE送信"
+      notify:
+        description: "Discord通知"
         type: choice
         options: ["off", "auto", "force"]
         default: "off"
@@ -41,10 +41,10 @@ jobs:
       - run: pip install -r requirements.txt
       - name: 集計
         env:
-          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: |
-          ARGS="--line ${{ inputs.line || 'auto' }}"
+          ARGS="--notify ${{ inputs.notify || 'auto' }}"
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
           python scripts/run.py $ARGS
       - name: 結果を保存

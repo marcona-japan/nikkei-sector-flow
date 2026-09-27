@@ -2,7 +2,7 @@
 
 1日を6区間（前場 寄り/中盤/引け、後場 寄り/中盤/大引け）に分け、
 区間ごとの業種別売買代金シェアを docs/data/*.json に書き出す。
-引け後の実行では LINE に日次レポートを送る。
+引け後の実行では Discord に日次レポートを送る。
 
 売買代金は Yahoo Finance の5分足から「代表値(高+安+終)/3 × 出来高」で概算。
 """
@@ -25,7 +25,7 @@ import constituents  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data"
-STATE = ROOT / "data" / "line_sent.txt"
+STATE = ROOT / "data" / "notified.txt"
 JST = timezone(timedelta(hours=9))
 DELAY_MIN = 20  # Yahooの東証データ遅延
 BASE_DAYS = 20  # 比較基準＝過去20営業日の平均シェア
@@ -216,7 +216,8 @@ def yen(v: float) -> str:
     return f"{v / 1e8:,.0f}億円"
 
 
-def line_text(d: dict) -> str:
+def report(d: dict) -> dict:
+    """通知用に要点をまとめる"""
     dt = datetime.fromisoformat(d["date"])
     wd = "月火水木金土日"[dt.weekday()]
     secs = [s for s in d["sectors"] if s["day_share"] is not None]
@@ -226,49 +227,66 @@ def line_text(d: dict) -> str:
     dn = [s for s in sorted(secs, key=lambda s: s["_dev"]) if s["_dev"] <= -0.05][:5]
 
     def row(i, s):
-        r = "" if s["ret"] is None else f" 株価{s['ret']:+.1f}%"
-        return f"{i}. {s['name']} {s['day_share']:.1f}%（{s['_dev']:+.1f}pt）{r}"
+        r = "" if s["ret"] is None else f"　株価{s['ret']:+.1f}%"
+        return f"{i}. **{s['name']}** {s['day_share']:.1f}%（{s['_dev']:+.1f}pt）{r}"
 
-    lines = [f"📊 日経225 資金移動（東証33業種）{dt.month}/{dt.day}({wd})"]
-    tot = f"売買代金(概算) {yen(d['day_total'])}"
+    tot = f"売買代金(概算) **{yen(d['day_total'])}**"
     if d.get("base_total"):
         tot += f"（20日平均比 {(d['day_total'] / d['base_total'] - 1) * 100:+.0f}%）"
-    lines += [tot, "", "▲ 資金流入（20日平均シェア比）"]
-    lines += [row(i + 1, s) for i, s in enumerate(up)]
-    lines += ["", "▼ 資金流出"]
-    lines += [row(i + 1, s) for i, s in enumerate(dn)]
 
-    # 前場 → 後場 の移動
     def half(idx):
-        tot = sum(d["windows"][i]["total"] for i in idx)
-        return {s["name"]: sum((s["values"][i] or 0) for i in idx) / tot * 100 if tot else 0
+        t = sum(d["windows"][i]["total"] for i in idx)
+        return {s["name"]: sum((s["values"][i] or 0) for i in idx) / t * 100 if t else 0
                 for s in d["sectors"]}
     am, pm = half([0, 1, 2]), half([3, 4, 5])
     mv = sorted(((pm[k] - am[k], k) for k in am), reverse=True)
-    lines += ["", "⏱ 前場→後場",
-              "向かった先: " + "、".join(f"{k}({v:+.1f}pt)" for v, k in mv[:3]),
-              "抜けた先: " + "、".join(f"{k}({v:+.1f}pt)" for v, k in mv[::-1][:3])]
+    return {
+        "title": f"📊 日経225 資金移動（東証33業種）{dt.month}/{dt.day}({wd})",
+        "total": tot,
+        "in": "\n".join(row(i + 1, s) for i, s in enumerate(up)) or "なし",
+        "out": "\n".join(row(i + 1, s) for i, s in enumerate(dn)) or "なし",
+        "half": ("向かった先: " + "、".join(f"{k}({v:+.1f}pt)" for v, k in mv[:3] if v > 0) + "\n"
+                 "抜けた先: " + "、".join(f"{k}({v:+.1f}pt)" for v, k in mv[::-1][:3] if v < 0)),
+    }
+
+
+def report_text(r: dict) -> str:
+    t = [r["title"], r["total"], "", "▲ 資金流入（20日平均シェア比）", r["in"],
+         "", "▼ 資金流出", r["out"], "", "⏱ 前場→後場", r["half"]]
     if PAGE_URL:
-        lines += ["", f"🔗 6区間の流れ: {PAGE_URL}"]
-    return "\n".join(lines)
+        t += ["", f"🔗 6区間の流れ: {PAGE_URL}"]
+    return "\n".join(t).replace("**", "")
 
 
-def send_line(text: str) -> None:
-    token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
-    if not token:
-        print("LINE_CHANNEL_ACCESS_TOKEN 未設定のため送信スキップ")
-        return
-    r = requests.post("https://api.line.me/v2/bot/message/broadcast",
-                      headers={"Authorization": f"Bearer {token}"},
-                      json={"messages": [{"type": "text", "text": text[:4900]}]}, timeout=30)
-    print("LINE:", r.status_code, r.text[:200])
-    r.raise_for_status()
+def send_discord(r: dict) -> bool:
+    url = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not url:
+        print("DISCORD_WEBHOOK_URL 未設定のため送信スキップ")
+        return False
+    embed = {
+        "title": r["title"],
+        "description": r["total"],
+        "color": 0xD03B3B,
+        "fields": [
+            {"name": "▲ 資金流入（20日平均シェア比）", "value": r["in"][:1024], "inline": False},
+            {"name": "▼ 資金流出", "value": r["out"][:1024], "inline": False},
+            {"name": "⏱ 前場→後場", "value": r["half"][:1024], "inline": False},
+        ],
+        "footer": {"text": "売買代金はYahoo Financeの5分足・日足から概算。投資判断はご自身で。"},
+    }
+    if PAGE_URL:
+        embed["url"] = PAGE_URL
+        embed["fields"].append({"name": "🔗 6区間の流れ", "value": PAGE_URL, "inline": False})
+    res = requests.post(url, json={"username": "セクター資金移動", "embeds": [embed]}, timeout=30)
+    print("Discord:", res.status_code, res.text[:200])
+    res.raise_for_status()
+    return True
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="集計日 YYYY-MM-DD（省略時は今日）")
-    ap.add_argument("--line", choices=["auto", "force", "off"], default="auto",
+    ap.add_argument("--notify", choices=["auto", "force", "off"], default="auto",
                     help="auto=引け後に1日1回 / force=必ず送る / off=送らない")
     a = ap.parse_args()
 
@@ -283,15 +301,13 @@ def main() -> None:
     write(data)
     print(f"書き出し: {target} final={data['final']} 合計{yen(data['day_total'])}")
 
-    text = line_text(data)
-    print("----- LINE本文 -----\n" + text + "\n--------------------")
+    r = report(data)
+    print("----- 通知本文 -----\n" + report_text(r) + "\n--------------------")
     sent = STATE.read_text().strip() if STATE.exists() else ""
-    if a.line == "force" or (a.line == "auto" and data["final"] and sent != data["date"]):
-        send_line(text)
-        if os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"):
+    if a.notify == "force" or (a.notify == "auto" and data["final"] and sent != data["date"]):
+        if send_discord(r):
             STATE.parent.mkdir(parents=True, exist_ok=True)
             STATE.write_text(data["date"])
-
 
 if __name__ == "__main__":
     main()
