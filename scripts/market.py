@@ -5,7 +5,7 @@
 - 広がり: 値上がり／値下がり銘柄数（Yahoo!ファイナンス、全市場）と騰落レシオ（25日、履歴が貯まってから）
 - 偏り: 空売り比率と業種別空売り比率（JPX）
 - 背景: ドル円・米10年金利・日本10年金利・米国株・原油（yfinance／財務省）
-- 予定: data/events.json（日米欧英の重要指標・中銀）とSQ日
+- 予定: data/events.json（日米欧英の重要指標・中銀）、SQ日、TOPIX定期入替・段階的ウエイト低減
 
 履歴は docs/data/market.json に保存（騰落レシオ・前日比の計算用）。
 """
@@ -171,8 +171,54 @@ def sq_dates(y: int) -> list[date]:
     return res
 
 
+def _bizday(d: date) -> bool:
+    if d.weekday() >= 5 or (d.month, d.day) in {(1, 1), (1, 2), (1, 3), (12, 31)}:
+        return False
+    try:
+        import jpholiday
+        return not jpholiday.is_holiday(d)
+    except ImportError:
+        return True
+
+
+def _last_bizday(y: int, m: int) -> date:
+    d = date(y, m, calendar.monthrange(y, m)[1])
+    while not _bizday(d):
+        d -= timedelta(days=1)
+    return d
+
+
+def _nth_bizday(y: int, m: int, n: int) -> date:
+    d, k = date(y, m, 1), 0
+    while True:
+        if _bizday(d):
+            k += 1
+            if k == n:
+                return d
+        d += timedelta(days=1)
+
+
+def topix_events() -> list[dict]:
+    """TOPIXの見直し（JPX総研 第2段階）の予定。
+    定期入替: 基準日=8月最終営業日、公表=10月第5営業日、反映=10月最終営業日（2026年・2028年）。
+    除外予定銘柄（移行銘柄）のウエイトは2026年10月から四半期ごと（1・4・7・10月の最終営業日）に段階的に低減、
+    2027年10月は再評価の結果も反映。"""
+    ev = []
+    for y, first in ((2026, True), (2028, False)):
+        ev.append({"date": _nth_bizday(y, 10, 5).isoformat(), "time": "", "imp": 2, "ccy": "JPY",
+                   "title": "TOPIX入替銘柄・浮動株比率の公表（JPX）"})
+        ev.append({"date": _last_bizday(y, 10).isoformat(), "time": "15:30", "imp": 3, "ccy": "JPY",
+                   "title": f"TOPIX定期入替（{'初回' if first else '2回目'}）反映 大引けでリバランス"})
+    for y, m in [(2027, 1), (2027, 4), (2027, 7), (2027, 10), (2028, 1), (2028, 4), (2028, 7)]:
+        extra = "・再評価結果" if (y, m) == (2027, 10) else ""
+        ev.append({"date": _last_bizday(y, m).isoformat(), "time": "15:30", "imp": 2, "ccy": "JPY",
+                   "title": f"TOPIXウエイト低減（除外予定銘柄{extra}）反映 大引け"})
+    return ev
+
+
 def load_events() -> list[dict]:
-    return json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
+    base = json.loads(EVENTS.read_text())["events"] if EVENTS.exists() else []
+    return base + topix_events()
 
 
 def fmt_event(d: date, e: dict, with_date: bool = True) -> str:
@@ -215,7 +261,8 @@ def next_major(today: date) -> list[str]:
     kinds = [("FOMC", "FOMC"), ("日銀会合", "日銀会合"), ("ECB理事会", "ECB"), ("BOE政策金利", "BOE"),
              ("米雇用統計", "米雇用統計"), ("米CPI", "米CPI"), ("米PCE", "米PCE"), ("英CPI", "英CPI"),
              ("ユーロ圏HICP", "ユーロ圏HICP"), ("全国CPI", "全国CPI"), ("東京都区部CPI", "東京都区部CPI"),
-             ("日銀短観", "日銀短観"), ("メジャーSQ", "メジャーSQ")]
+             ("日銀短観", "日銀短観"), ("メジャーSQ", "メジャーSQ"), ("TOPIX定期入替", "TOPIX定期入替"),
+             ("TOPIXウエイト低減", "TOPIXウエイト低減")]
     out = []
     for key, label in kinds:
         nxt = next(((d, t) for d, t in sorted(items) if d > today and t.startswith(key)), None)

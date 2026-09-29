@@ -318,9 +318,19 @@ def main() -> None:
     label = "前場引け" if sess == "am" else "大引け"
     wd = "月火水木金土日"[now.weekday()]
 
+    fields = []
+    try:  # 指数（前場引け・大引け時点）
+        from market import index_quote
+        nk, tp = index_quote("998407.O"), index_quote("998405.T")
+        arrow = lambda v: "🔺" if v > 0 else "🔻" if v < 0 else "➖"  # noqa: E731
+        fields.append({"name": "📈 指数", "inline": False, "value":
+                       f"{arrow(nk['chg'])} 日経平均 **{nk['price']:,.0f}**（{nk['chg']:+,.0f} / {nk['pct']:+.2f}%）\n"
+                       f"{arrow(tp['chg'])} TOPIX **{tp['price']:,.2f}**（{tp['chg']:+,.2f} / {tp['pct']:+.2f}%）\n"
+                       f"NT倍率 {nk['price'] / tp['price']:.2f}倍"})
+    except Exception as e:  # noqa: BLE001
+        print("指数の取得失敗:", e)
     MARKETS.update(market_map())
     print(f"市場区分: {len(MARKETS)}銘柄")
-    fields = []
     today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
         rows, total = fetch(key)
