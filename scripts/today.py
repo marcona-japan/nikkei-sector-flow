@@ -17,7 +17,7 @@ import notify  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 EVENTS = ROOT / "data" / "events.json"
 JST = timezone(timedelta(hours=9))
-PAIRS = {"JPY": "ドル円", "USD": "ドル円・ユーロドル・ポンドル", "EUR": "ユーロドル", "GBP": "ポンドル"}
+PAIRS = {"CNY": "豪ドル・人民元", "JPY": "ドル円", "USD": "ドル円・ユーロドル・ポンドル", "EUR": "ユーロドル", "GBP": "ポンドル"}
 
 
 def window_events(today: date) -> list[tuple[datetime | None, dict]]:

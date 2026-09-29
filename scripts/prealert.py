@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 EVENTS = ROOT / "data" / "events.json"
 JST = timezone(timedelta(hours=9))
 LEAD = timedelta(minutes=15)
-PAIRS = {"JPY": "ドル円", "USD": "ドル円・ユーロドル・ポンドル", "EUR": "ユーロドル", "GBP": "ポンドル"}
+PAIRS = {"CNY": "豪ドル・人民元", "JPY": "ドル円", "USD": "ドル円・ユーロドル・ポンドル", "EUR": "ユーロドル", "GBP": "ポンドル"}
 
 
 def nominal_slot(now: datetime) -> datetime:
