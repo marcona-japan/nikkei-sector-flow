@@ -303,6 +303,12 @@ def line(r: dict) -> str:
     return f"{m}`{r['code']}` {r['name'][:12]}{p}{c}{x}"
 
 
+def same_day(text: str, d: date) -> bool:
+    """Yahooの日付表記（'9/30'・'09/30'・'2026/09/30'・'2026-09-30' など）が d と同じ日か。日付が読めない表記は同じ日とみなす"""
+    m = re.search(r"(?:\d{4}[/-])?(\d{1,2})[/-](\d{1,2})", str(text))
+    return True if not m else (int(m.group(1)), int(m.group(2))) == (d.month, d.day)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--session", choices=["am", "pm", "auto"], default="auto")
@@ -331,11 +337,12 @@ def main() -> None:
         print("指数の取得失敗:", e)
     MARKETS.update(market_map())
     print(f"市場区分: {len(MARKETS)}銘柄")
-    today_md = now.strftime("%m/%d")
     for title, key, _, n in PAGES:
         rows, total = fetch(key)
-        if rows and rows[0].get("date") and rows[0]["date"] != today_md and not a.ignore_holiday:
-            print(f"ランキングの日付が {rows[0]['date']}（今日ではない）ため送信しません")
+        rd = rows[0].get("date") if rows else ""
+        print(f"[{key}] ランキングの日付表記: {rd!r}")
+        if rd and not a.ignore_holiday and not same_day(rd, now.date()):
+            print(f"ランキングの日付が {rd}（今日ではない）ため送信しません")
             return
         cnt = total if total is not None else len(rows)
         print(f"{title}: {cnt}件", *[line(r) for r in rows[:n]], sep="\n  ")
