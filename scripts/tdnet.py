@@ -30,7 +30,7 @@ PAGE_URL = "https://marcona-japan.github.io/nikkei-sector-flow/tdnet.html"
 
 # (タグ, 絵文字, 色, キーワード)  上から順に最初に当たったものを採用
 TAGS = [
-    ("TOB・M&A", "🏷️", 0x8E44AD, r"公開買付|ＴＯＢ|TOB|株式交換|株式移転|合併|子会社化|買収|事業譲渡|経営統合|MBO|ＭＢＯ"),
+    ("TOB・M&A", "🏷️", 0x8E44AD, r"公開買付|ＴＯＢ|TOB|子会社の異動|子会社の譲渡|株式交換|株式移転|合併|子会社化|買収|事業譲渡|経営統合|MBO|ＭＢＯ"),
     ("業績修正", "📈", 0xD03B3B, r"業績予想の修正|業績修正|上方修正|下方修正|予想値と実績値との差異|特別(利益|損失)"),
     ("決算", "📊", 0x2A78D6, r"決算短信|決算説明|四半期"),
     ("配当", "💴", 0xEDA100, r"配当|株主優待"),
@@ -101,6 +101,39 @@ def embed(x: dict) -> dict:
     }
 
 
+def group_embeds(xs: list[dict]) -> list[dict]:
+    """同じ銘柄の開示は1枚のカードにまとめる（大量開示で通知が何通も来ないように）"""
+    order = [t[0] for t in TAGS] + ["その他"]
+    by: dict[str, list[dict]] = {}
+    for x in xs:
+        by.setdefault(x["code"], []).append(x)
+    out = []
+    for code, items in by.items():
+        if len(items) == 1:
+            out.append(embed(items[0]))
+            continue
+        items.sort(key=lambda x: (order.index(x["tag"]), x["time"]))
+        _, _, color = tag_of(items[0]["title"])
+        lines, seen_t = [], set()
+        for x in items:
+            if x["title"] in seen_t:  # 同じ件名の重複は1回だけ
+                continue
+            seen_t.add(x["title"])
+            t = x["title"] if len(x["title"]) <= 60 else x["title"][:58] + "…"
+            lines.append(f"{x['emoji']} [{t}]({x['url']})" if x["url"] else f"{x['emoji']} {t}")
+        desc = ""
+        for i, ln in enumerate(lines):
+            if len(desc) + len(ln) + 1 > 3900:
+                desc += f"\n…ほか{len(lines) - i}件（一覧ページ参照）"
+                break
+            desc += ("\n" if desc else "") + ln
+        times = sorted({x["time"][11:16] for x in items})
+        out.append({"title": f"📚 {code} {items[0]['name']}　開示{len(lines)}件"[:256], "description": desc,
+                    "url": PAGE_URL, "color": color,
+                    "footer": {"text": f"{items[0]['time'][:10]} {'・'.join(times)}"}})
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="対象日 YYYY-MM-DD（省略時は今日と前日）")
@@ -145,7 +178,19 @@ def main() -> None:
     else:
         head = {"title": f"📰 監視銘柄の適時開示 {len(targets)}件", "url": PAGE_URL, "color": 0x0B0B0B,
                 "description": "　".join(sorted({f"{x['code']} {x['name']}" for x in targets}))[:4000]}
-        if notify.send([head] + [embed(x) for x in targets], "TDnet開示チェック", "tdnet"):
+        # Discordは1メッセージ合計6000文字まで。カードが多い時は分けて送る
+        cards = [head] + group_embeds(targets)
+        batches, cur, size = [], [], 0
+        for c in cards:
+            n = len(c.get("title", "")) + len(c.get("description", "")) + len(c.get("footer", {}).get("text", ""))
+            if cur and (len(cur) >= 10 or size + n > 5500):
+                batches.append(cur)
+                cur, size = [], 0
+            cur.append(c)
+            size += n
+        batches.append(cur)
+        ok = all(notify.send(b, "TDnet開示チェック", "tdnet") for b in batches)
+        if ok:
             for x in targets:
                 seen.setdefault(x["time"][:10], []).append(x["id"])
     keep = {(today - timedelta(days=i)).isoformat() for i in range(7)}

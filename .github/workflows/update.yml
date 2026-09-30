@@ -34,6 +34,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # 順番待ちの後でも最新の状態から始める（古い履歴で二重通知しないため）
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
