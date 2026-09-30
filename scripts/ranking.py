@@ -10,6 +10,7 @@ import io
 import json
 import re
 import sys
+import time
 import unicodedata
 from functools import lru_cache
 from datetime import date, datetime, timedelta, timezone
@@ -337,13 +338,23 @@ def main() -> None:
         print("指数の取得失敗:", e)
     MARKETS.update(market_map())
     print(f"市場区分: {len(MARKETS)}銘柄")
+    # Yahooのランキングは引け直後だと前日分のままのことがある → 今日の分に切り替わるまで5分おきに最大40分待つ
+    stale = ""
+    for attempt in range(9):
+        got = {key: fetch(key) for _, key, _, _ in PAGES}
+        dates = {key: (r[0].get("date") if r else "") for key, (r, _) in got.items()}
+        print(f"ランキングの日付表記（{attempt + 1}回目）: {dates}")
+        old = [d for d in dates.values() if d and not same_day(d, now.date())]
+        if a.ignore_holiday or not old:
+            stale = ""
+            break
+        stale = old[0]
+        if attempt < 8:
+            time.sleep(300)
+    if stale:
+        print(f"40分待ってもランキングが今日の分になりません（{stale}）")
     for title, key, _, n in PAGES:
-        rows, total = fetch(key)
-        rd = rows[0].get("date") if rows else ""
-        print(f"[{key}] ランキングの日付表記: {rd!r}")
-        if rd and not a.ignore_holiday and not same_day(rd, now.date()):
-            print(f"ランキングの日付が {rd}（今日ではない）ため送信しません")
-            return
+        rows, total = got[key]
         cnt = total if total is not None else len(rows)
         print(f"{title}: {cnt}件", *[line(r) for r in rows[:n]], sep="\n  ")
         if not rows:
@@ -360,6 +371,9 @@ def main() -> None:
         fields.append({"name": head, "value": value, "inline": False})
 
     fields += ipo_fields(now.date())
+    if stale:
+        fields.insert(0, {"name": "⚠️ 注意", "inline": False,
+                          "value": f"Yahoo!ファイナンスのランキングが今日の分に更新されていません（表示中: {stale}）"})
     embed = {"title": f"📋 日経マーケット速報 {now.month}/{now.day}({wd}) {label}",
              "color": 0x0B0B0B, "fields": fields,
              "footer": {"text": LEGEND + "\nYahoo!ファイナンス ランキング（全市場）より"}}
