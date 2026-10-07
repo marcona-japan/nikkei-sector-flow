@@ -1,0 +1,38 @@
+name: FX決済リマインド
+
+on:
+  schedule:
+    # 決済の30分前に起動して時刻まで待つ（UTC表記）
+    - cron: "30 12 * * 1,3,4,5"   # 月・水・木・金 21:30 JST → 21:45 / 22:00 に通知
+    - cron: "30 14 * * 2"         # 火 23:30 JST → 23:45 / 24:00 に通知
+  workflow_dispatch:
+    inputs:
+      notify:
+        description: "Discord通知"
+        type: choice
+        options: ["off", "on"]
+        default: "off"
+      test:
+        description: "テスト送信（待たずに今すぐ2通送る）"
+        type: boolean
+        default: false
+
+jobs:
+  closing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts
+            data
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: リマインド
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_MARKET: ${{ secrets.DISCORD_WEBHOOK_MARKET }}
+        run: python scripts/closing.py --notify ${{ inputs.notify || 'on' }} ${{ inputs.test && '--test' || '' }}
