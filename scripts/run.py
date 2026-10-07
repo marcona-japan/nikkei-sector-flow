@@ -2,7 +2,7 @@
 
 1日を6区間（前場 寄り/中盤/引け、後場 寄り/中盤/大引け）に分け、
 区間ごとの業種別売買代金シェアを docs/data/*.json に書き出す。
-引け後の実行では Discord に日次レポートを送る。
+場中は30分枠ごとに資金流入・流出1位の業種と主な銘柄の株価を、引け後は日次レポートを Discord に送る。
 
 売買代金は Yahoo Finance の5分足から「代表値(高+安+終)/3 × 出来高」で概算。
 """
@@ -42,6 +42,9 @@ WINDOWS = [
     ("pm_close", "大引け", "15:00", "16:00"),
 ]
 WIN_END_LABEL = {"pm_close": "15:30"}
+# 場中速報用の30分刻み（最後の枠は引けの板寄せを含むよう16:00まで）
+SLOTS = ([(f"{h:02d}:{m:02d}", f"{h + (m + 30) // 60:02d}:{(m + 30) % 60:02d}") for h in (9, 10, 11) for m in (0, 30)][:5]
+         + [(f"{h:02d}:{m:02d}", f"{h + (m + 30) // 60:02d}:{(m + 30) % 60:02d}") for h in (12, 13, 14, 15) for m in (0, 30)][1:7])
 
 
 def hm(s: str) -> int:
@@ -182,6 +185,23 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
             "ret": round(float(r.mean()), 2) if len(r) else None,
         })
 
+    # 30分刻みの業種別シェアと主な銘柄（場中速報用）
+    slots = []
+    for st_, en_ in SLOTS:
+        en_eff = "16:00" if en_ == "15:30" else en_
+        w = it[(it["min"] >= hm(st_)) & (it["min"] < hm(en_eff))]
+        tot = float(w["value"].sum())
+        state = "done" if now_min >= hm(en_) + DELAY_MIN and tot > 0 else ("partial" if tot > 0 else "pending")
+        sh, tp = {}, {}
+        if tot > 0:
+            g = w.groupby(["sector", "code"])["value"].sum()
+            for sec in sectors:
+                if sec in g.index.get_level_values(0):
+                    gs = g[sec].sort_values(ascending=False)
+                    sh[sec] = round(float(gs.sum()) / tot * 100, 3)
+                    tp[sec] = [[c, name_of.get(c, c)] for c in gs.head(5).index]
+        slots.append({"label": f"{st_}–{en_}", "state": state, "total": round(tot), "shares": sh, "tops": tp})
+
     # 銘柄ごとの現在値・前日差・前日比（場中速報用）
     stocks = {}
     for c, px in last_px.items():
@@ -203,6 +223,7 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
         "sectors": out_sectors,
         "closing_added": round(closing_added),
         "stocks": stocks,
+        "slots": slots,
         "note": "売買代金はYahoo Financeの5分足から概算（約20分遅れ）。基準は過去20営業日の業種別シェア平均。",
     }
 
@@ -294,25 +315,28 @@ def send_discord(r: dict) -> bool:
     return True
 
 
-def window_embed(d: dict, k: int, n_sec: int = 3, n_stock: int = 5) -> dict | None:
-    """区間kで売買代金シェアが増えた業種（直前の区間比、最初の区間は20日平均比）の上位と、その主な銘柄の株価"""
-    win = d["windows"][k]
-    prev_label = d["windows"][k - 1]["label"] if k else "20日平均"
+def slot_embeds(d: dict, k: int, n_sec: int = 1, n_stock: int = 5) -> list[dict]:
+    """30分枠kで売買代金シェアが増えた業種（流入）・減った業種（流出）の上位と、その主な銘柄の株価。
+    比較は直前の枠（最初の枠は20日平均）"""
+    sl = d["slots"][k]
+    prev = d["slots"][k - 1] if k else None
+    base = {s["name"]: s["base"] for s in d["sectors"]}
+    secs = set(sl["shares"]) | (set(prev["shares"]) if prev else set())
     rows = []
-    for s in d["sectors"]:
-        cur = s["shares"][k]
-        prev = s["shares"][k - 1] if k else s["base"]
-        if cur is None or prev is None:
+    for sec in secs:
+        cur = sl["shares"].get(sec, 0.0)
+        pv = prev["shares"].get(sec, 0.0) if prev else base.get(sec)
+        if pv is None:
             continue
-        rows.append((cur - prev, cur, s))
-    rows = [r for r in sorted(rows, key=lambda r: -r[0]) if r[0] > 0][:n_sec]
-    if not rows:
-        return None
+        rows.append((cur - pv, cur, sec))
+    ups = [r for r in sorted(rows, key=lambda r: -r[0]) if r[0] > 0][:n_sec]
+    dns = [r for r in sorted(rows, key=lambda r: r[0]) if r[0] < 0][:n_sec]
     stocks = d.get("stocks", {})
-    fields = []
-    for i, (dl, cur, s) in enumerate(rows, 1):
+    tops_prev = prev["tops"] if prev else {}
+
+    def stock_lines(sec, tops):
         lines = []
-        for code, name, _v in (s["tops"][k] or [])[:n_stock]:
+        for code, name in tops.get(sec, [])[:n_stock]:
             st = stocks.get(code)
             if not st:
                 continue
@@ -321,17 +345,31 @@ def window_embed(d: dict, k: int, n_sec: int = 3, n_stock: int = 5) -> dict | No
             pxs = f"{px:,.0f}" if px >= 100 else f"{px:,.1f}"
             chs = f"{chg:+,.0f}" if abs(chg) >= 10 else f"{chg:+,.1f}"
             lines.append(f"{mark} `{code}` {name[:10]} **{pxs}円**（{chs}円 / {pct:+.2f}%）")
-        fields.append({"name": f"{i}. {s['name']}　+{dl:.2f}pt（シェア {cur:.1f}%）",
-                       "value": "\n".join(lines)[:1024] or "銘柄データなし", "inline": False})
+        return "\n".join(lines)[:1024] or "銘柄データなし"
+
     dt = datetime.fromisoformat(d["date"])
     wd = "月火水木金土日"[dt.weekday()]
-    emb = {"title": f"⏱ {win['label']}（{win['range']}）資金流入トップ　{dt.month}/{dt.day}({wd})",
-           "description": f"{prev_label} → {win['label']} で売買代金シェアが増えた業種と、その中で売買代金の多い銘柄。株価は現在値・前日差・前日比（約20分遅れ）",
-           "color": 0xD03B3B, "fields": fields,
-           "footer": {"text": "日経225構成銘柄・Yahoo Financeの5分足から概算。投資判断はご自身で。"}}
-    if PAGE_URL:
-        emb["url"] = PAGE_URL
-    return emb
+    prev_label = prev["label"] if prev else "20日平均"
+    out = []
+    if ups:
+        out.append({"title": f"⏱ {sl['label']} ▲資金流入 1位　{dt.month}/{dt.day}({wd})",
+                    "description": f"{prev_label} → {sl['label']} で売買代金シェアが増えた業種と、その枠で売買代金の多い銘柄。株価は現在値・前日差・前日比（約20分遅れ）",
+                    "color": 0xD03B3B,
+                    "fields": [{"name": f"{i}. {sec}　+{dl:.2f}pt（シェア {cur:.1f}%）",
+                                "value": stock_lines(sec, sl["tops"]), "inline": False}
+                               for i, (dl, cur, sec) in enumerate(ups, 1)]})
+    if dns:
+        out.append({"title": f"⏱ {sl['label']} ▼資金流出 1位",
+                    "description": f"シェアが減った業種と、主な銘柄（前の枠で売買代金が多かった銘柄を優先）",
+                    "color": 0x2A78D6,
+                    "fields": [{"name": f"{i}. {sec}　{dl:.2f}pt（シェア {cur:.1f}%）",
+                                "value": stock_lines(sec, tops_prev if tops_prev.get(sec) else sl["tops"]),
+                                "inline": False}
+                               for i, (dl, cur, sec) in enumerate(dns, 1)],
+                    "footer": {"text": "日経225構成銘柄・Yahoo Financeの5分足から概算。投資判断はご自身で。"}})
+    if PAGE_URL and out:
+        out[0]["url"] = PAGE_URL
+    return out
 
 
 def send_embeds(embeds: list[dict]) -> bool:
@@ -345,26 +383,25 @@ def send_embeds(embeds: list[dict]) -> bool:
     return True
 
 
-def notify_window(d: dict, mode: str) -> None:
-    """新しく確定した区間があれば、場中速報（流入トップ業種＋銘柄の株価）を送る。複数たまっていたら最新の1区間だけ"""
-    done = [i for i, w in enumerate(d["windows"]) if w["state"] == "done"]
+def notify_slot(d: dict, mode: str) -> None:
+    """新しく確定した30分枠があれば場中速報を送る。複数たまっていたら最新の1枠だけ"""
+    done = [i for i, x in enumerate(d.get("slots", [])) if x["state"] == "done"]
     if not done:
         return
     k = done[-1]
     st = json.loads(WSTATE.read_text()) if WSTATE.exists() else {}
     sent = st.get(d["date"], [])
-    key = d["windows"][k]["key"]
+    key = d["slots"][k]["label"]
     if mode == "off" or (mode == "auto" and key in sent):
         return
-    emb = window_embed(d, k)
-    if emb:
-        print(json.dumps(emb, ensure_ascii=False, indent=1))
-        if send_embeds([emb]):
-            sent.append(key)
-            st = {k2: v for k2, v in st.items() if k2 >= (datetime.fromisoformat(d["date"]) - timedelta(days=7)).date().isoformat()}
-            st[d["date"]] = sorted(set(sent))
-            WSTATE.parent.mkdir(parents=True, exist_ok=True)
-            WSTATE.write_text(json.dumps(st))
+    embs = slot_embeds(d, k)
+    if embs and send_embeds(embs):
+        sent.append(key)
+        cut = (datetime.fromisoformat(d["date"]) - timedelta(days=7)).date().isoformat()
+        st = {k2: v for k2, v in st.items() if k2 >= cut}
+        st[d["date"]] = sorted(set(sent))
+        WSTATE.parent.mkdir(parents=True, exist_ok=True)
+        WSTATE.write_text(json.dumps(st, ensure_ascii=False))
 
 
 def main() -> None:
@@ -386,7 +423,7 @@ def main() -> None:
     print(f"書き出し: {target} final={data['final']} 合計{yen(data['day_total'])}")
 
     try:
-        notify_window(data, a.notify)
+        notify_slot(data, a.notify)
     except Exception as e:  # noqa: BLE001  場中速報の失敗で日次処理を止めない
         print("場中速報の送信失敗:", e)
 
