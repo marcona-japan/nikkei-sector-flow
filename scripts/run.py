@@ -26,6 +26,7 @@ import constituents  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "data"
 STATE = ROOT / "data" / "notified.txt"
+WSTATE = ROOT / "data" / "notified_windows.json"  # 区間ごとの場中速報の送信済み記録
 JST = timezone(timedelta(hours=9))
 DELAY_MIN = 20  # Yahooの東証データ遅延
 BASE_DAYS = 20  # 比較基準＝過去20営業日の平均シェア
@@ -165,7 +166,7 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
             v = float(ws["value"].sum())
             shares.append(round(v / win["total"] * 100, 3) if win["total"] else None)
             values.append(round(v))
-            top = ws.groupby("code")["value"].sum().sort_values(ascending=False).head(3)
+            top = ws.groupby("code")["value"].sum().sort_values(ascending=False).head(5)
             tops.append([[c, name_of.get(c, c), round(float(x))] for c, x in top.items()])
         sv = float(it.loc[it["sector"] == sec, "value"].sum())
         r = ret.reindex(codes).dropna()
@@ -181,6 +182,15 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
             "ret": round(float(r.mean()), 2) if len(r) else None,
         })
 
+    # 銘柄ごとの現在値・前日差・前日比（場中速報用）
+    stocks = {}
+    for c, px in last_px.items():
+        pc = prev_close.get(c)
+        if pd.isna(px) or pc is None or pd.isna(pc) or not pc:
+            continue
+        stocks[c] = [name_of.get(c, c), round(float(px), 1), round(float(px - pc), 1),
+                     round(float((px / pc - 1) * 100), 2)]
+
     final = all(w["state"] == "done" for w in windows)
     return {
         "date": target.isoformat(),
@@ -192,6 +202,7 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
         "windows": windows,
         "sectors": out_sectors,
         "closing_added": round(closing_added),
+        "stocks": stocks,
         "note": "売買代金はYahoo Financeの5分足から概算（約20分遅れ）。基準は過去20営業日の業種別シェア平均。",
     }
 
@@ -283,6 +294,79 @@ def send_discord(r: dict) -> bool:
     return True
 
 
+def window_embed(d: dict, k: int, n_sec: int = 3, n_stock: int = 5) -> dict | None:
+    """区間kで売買代金シェアが増えた業種（直前の区間比、最初の区間は20日平均比）の上位と、その主な銘柄の株価"""
+    win = d["windows"][k]
+    prev_label = d["windows"][k - 1]["label"] if k else "20日平均"
+    rows = []
+    for s in d["sectors"]:
+        cur = s["shares"][k]
+        prev = s["shares"][k - 1] if k else s["base"]
+        if cur is None or prev is None:
+            continue
+        rows.append((cur - prev, cur, s))
+    rows = [r for r in sorted(rows, key=lambda r: -r[0]) if r[0] > 0][:n_sec]
+    if not rows:
+        return None
+    stocks = d.get("stocks", {})
+    fields = []
+    for i, (dl, cur, s) in enumerate(rows, 1):
+        lines = []
+        for code, name, _v in (s["tops"][k] or [])[:n_stock]:
+            st = stocks.get(code)
+            if not st:
+                continue
+            _, px, chg, pct = st
+            mark = "🔺" if chg > 0 else "🔻" if chg < 0 else "➖"
+            pxs = f"{px:,.0f}" if px >= 100 else f"{px:,.1f}"
+            chs = f"{chg:+,.0f}" if abs(chg) >= 10 else f"{chg:+,.1f}"
+            lines.append(f"{mark} `{code}` {name[:10]} **{pxs}円**（{chs}円 / {pct:+.2f}%）")
+        fields.append({"name": f"{i}. {s['name']}　+{dl:.2f}pt（シェア {cur:.1f}%）",
+                       "value": "\n".join(lines)[:1024] or "銘柄データなし", "inline": False})
+    dt = datetime.fromisoformat(d["date"])
+    wd = "月火水木金土日"[dt.weekday()]
+    emb = {"title": f"⏱ {win['label']}（{win['range']}）資金流入トップ　{dt.month}/{dt.day}({wd})",
+           "description": f"{prev_label} → {win['label']} で売買代金シェアが増えた業種と、その中で売買代金の多い銘柄。株価は現在値・前日差・前日比（約20分遅れ）",
+           "color": 0xD03B3B, "fields": fields,
+           "footer": {"text": "日経225構成銘柄・Yahoo Financeの5分足から概算。投資判断はご自身で。"}}
+    if PAGE_URL:
+        emb["url"] = PAGE_URL
+    return emb
+
+
+def send_embeds(embeds: list[dict]) -> bool:
+    url = os.environ.get("DISCORD_WEBHOOK_URL")
+    if not url:
+        print("DISCORD_WEBHOOK_URL 未設定のため送信スキップ")
+        return False
+    res = requests.post(url, json={"username": "セクター資金移動", "embeds": embeds}, timeout=30)
+    print("Discord:", res.status_code, res.text[:200])
+    res.raise_for_status()
+    return True
+
+
+def notify_window(d: dict, mode: str) -> None:
+    """新しく確定した区間があれば、場中速報（流入トップ業種＋銘柄の株価）を送る。複数たまっていたら最新の1区間だけ"""
+    done = [i for i, w in enumerate(d["windows"]) if w["state"] == "done"]
+    if not done:
+        return
+    k = done[-1]
+    st = json.loads(WSTATE.read_text()) if WSTATE.exists() else {}
+    sent = st.get(d["date"], [])
+    key = d["windows"][k]["key"]
+    if mode == "off" or (mode == "auto" and key in sent):
+        return
+    emb = window_embed(d, k)
+    if emb:
+        print(json.dumps(emb, ensure_ascii=False, indent=1))
+        if send_embeds([emb]):
+            sent.append(key)
+            st = {k2: v for k2, v in st.items() if k2 >= (datetime.fromisoformat(d["date"]) - timedelta(days=7)).date().isoformat()}
+            st[d["date"]] = sorted(set(sent))
+            WSTATE.parent.mkdir(parents=True, exist_ok=True)
+            WSTATE.write_text(json.dumps(st))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="集計日 YYYY-MM-DD（省略時は今日）")
@@ -300,6 +384,11 @@ def main() -> None:
         return
     write(data)
     print(f"書き出し: {target} final={data['final']} 合計{yen(data['day_total'])}")
+
+    try:
+        notify_window(data, a.notify)
+    except Exception as e:  # noqa: BLE001  場中速報の失敗で日次処理を止めない
+        print("場中速報の送信失敗:", e)
 
     r = report(data)
     print("----- 通知本文 -----\n" + report_text(r) + "\n--------------------")
