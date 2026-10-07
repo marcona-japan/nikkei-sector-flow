@@ -329,7 +329,7 @@ def main() -> None:
     try:  # 指数（前場引け・大引け時点）
         from market import index_quote
         nk, tp = index_quote("998407.O"), index_quote("998405.T")
-        arrow = lambda v: "🔺" if v > 0 else "🔻" if v < 0 else "➖"  # noqa: E731
+        arrow = lambda v: "🔺" if v > 0 else "🔽" if v < 0 else "➖"  # noqa: E731
         fields.append({"name": "📈 指数", "inline": False, "value":
                        f"{arrow(nk['chg'])} 日経平均 **{nk['price']:,.0f}**（{nk['chg']:+,.0f} / {nk['pct']:+.2f}%）\n"
                        f"{arrow(tp['chg'])} TOPIX **{tp['price']:,.2f}**（{tp['chg']:+,.2f} / {tp['pct']:+.2f}%）\n"

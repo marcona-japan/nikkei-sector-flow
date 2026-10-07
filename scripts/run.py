@@ -341,7 +341,7 @@ def slot_embeds(d: dict, k: int, n_sec: int = 1, n_stock: int = 5) -> list[dict]
             if not st:
                 continue
             _, px, chg, pct = st
-            mark = "🔺" if chg > 0 else "🔻" if chg < 0 else "➖"
+            mark = "🔺" if chg > 0 else "🔽" if chg < 0 else "➖"
             pxs = f"{px:,.0f}" if px >= 100 else f"{px:,.1f}"
             chs = f"{chg:+,.0f}" if abs(chg) >= 10 else f"{chg:+,.1f}"
             lines.append(f"{mark} `{code}` {name[:10]} **{pxs}円**（{chs}円 / {pct:+.2f}%）")
@@ -352,14 +352,14 @@ def slot_embeds(d: dict, k: int, n_sec: int = 1, n_stock: int = 5) -> list[dict]
     prev_label = prev["label"] if prev else "20日平均"
     out = []
     if ups:
-        out.append({"title": f"⏱ {sl['label']} ▲資金流入 1位　{dt.month}/{dt.day}({wd})",
+        out.append({"title": f"🟥 {sl['label']} 資金流入 1位　{dt.month}/{dt.day}({wd})",
                     "description": f"{prev_label} → {sl['label']} で売買代金シェアが増えた業種と、その枠で売買代金の多い銘柄。株価は現在値・前日差・前日比（約20分遅れ）",
                     "color": 0xD03B3B,
                     "fields": [{"name": f"{i}. {sec}　+{dl:.2f}pt（シェア {cur:.1f}%）",
                                 "value": stock_lines(sec, sl["tops"]), "inline": False}
                                for i, (dl, cur, sec) in enumerate(ups, 1)]})
     if dns:
-        out.append({"title": f"⏱ {sl['label']} ▼資金流出 1位",
+        out.append({"title": f"🟦 {sl['label']} 資金流出 1位",
                     "description": f"シェアが減った業種と、主な銘柄（前の枠で売買代金が多かった銘柄を優先）",
                     "color": 0x2A78D6,
                     "fields": [{"name": f"{i}. {sec}　{dl:.2f}pt（シェア {cur:.1f}%）",
