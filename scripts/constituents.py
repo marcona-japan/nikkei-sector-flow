@@ -137,7 +137,7 @@ def fetch_g250_codes() -> list[str]:
         i = max(text.rfind("2.指数構成銘柄"), text.rfind("２．指数構成銘柄"), text.rfind("指数構成銘柄"))
         body = text[i:] if i >= 0 else text
         print(f"{url}: 「指数構成銘柄」位置 {i} / 全{len(text)}文字", file=sys.stderr)
-        codes = list(dict.fromkeys(re.findall(r"(?<![0-9A-Z])([1-9][0-9][0-9A-Z][0-9])(?![0-9A-Z])", body)))
+        codes = list(dict.fromkeys(re.findall(r"(?<![0-9A-Z])([1-9][0-9][0-9A-Z][0-9A-Z])(?![0-9A-Z])", body)))
         if 200 <= len(codes) <= 320:
             return codes
         print(f"{url}: コード数が想定外 {len(codes)}", file=sys.stderr)
