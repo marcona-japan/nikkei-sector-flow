@@ -134,8 +134,9 @@ def fetch_g250_codes() -> list[str]:
             continue
         with pdfplumber.open(io.BytesIO(r.content)) as pdf:
             text = "\n".join(p.extract_text() or "" for p in pdf.pages)
-        i = text.find("指数構成銘柄")
+        i = max(text.rfind("2.指数構成銘柄"), text.rfind("２．指数構成銘柄"), text.rfind("指数構成銘柄"))
         body = text[i:] if i >= 0 else text
+        print(f"{url}: 「指数構成銘柄」位置 {i} / 全{len(text)}文字", file=sys.stderr)
         codes = list(dict.fromkeys(re.findall(r"(?<![0-9A-Z])([1-9][0-9][0-9A-Z][0-9])(?![0-9A-Z])", body)))
         if 200 <= len(codes) <= 320:
             return codes
@@ -149,6 +150,8 @@ def build_g250() -> pd.DataFrame:
     x["code"] = x["コード"].astype(str).str.strip().str.upper()
     x = x.rename(columns={"銘柄名": "name", "33業種コード": "s33_code", "33業種区分": "sector"})
     df = pd.DataFrame({"code": codes}).merge(x[["code", "name", "s33_code", "sector"]], on="code", how="left")
+    miss = df[df["sector"].isna() | (df["sector"] == "-")]["code"].tolist()
+    print(f"グロース250: PDF {len(codes)}銘柄、業種が見つからない {len(miss)}銘柄 {miss[:20]}", file=sys.stderr)
     df = df.dropna(subset=["sector"])
     df = df[df["sector"] != "-"].sort_values(["s33_code", "code"]).reset_index(drop=True)
     df.to_csv(G250_CSV, index=False)
