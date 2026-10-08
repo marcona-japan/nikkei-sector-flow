@@ -122,7 +122,8 @@ footer{color:var(--muted);font-size:11.5px;padding:8px 0 0}
   <header>
     <div>
       <h1>セクター資金移動</h1>
-      <div class="sub">日経225構成銘柄 × 東証33業種 ・ 売買代金シェア</div>
+      <div class="sub" id="univ-sub">日経225構成銘柄 × 東証33業種 ・ 売買代金シェア</div>
+      <div class="seg" id="univ" style="margin:8px 0 0"><button data-u="n225">日経225</button><button data-u="g250">グロース250</button></div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span id="status" class="chip"><span class="dot"></span><span>—</span></span>
@@ -188,9 +189,17 @@ let D = null, mode = 1, selSector = null, selWin = null;
 
 async function getJSON(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error(u+' '+r.status); return r.json(); }
 
+const U = new URLSearchParams(location.search).get('u') === 'g250' ? 'g250' : 'n225';
+const BASE = U === 'g250' ? 'data/g250/' : 'data/';
+document.querySelectorAll('#univ button').forEach(b => {
+  b.setAttribute('aria-pressed', b.dataset.u === U);
+  b.onclick = () => { location.search = b.dataset.u === 'g250' ? '?u=g250' : ''; };
+});
+if (U === 'g250') $('#univ-sub').textContent = 'グロース250構成銘柄 × 東証33業種 ・ 売買代金シェア';
+
 async function init(){
   try{
-    const idx = await getJSON('data/index.json');
+    const idx = await getJSON(BASE + 'index.json');
     const sel = $('#date');
     sel.innerHTML = idx.slice().reverse().map(d=>{
       const dt = new Date(d+'T00:00:00+09:00'); return `<option value="${d}">${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})</option>`;}).join('');
@@ -201,7 +210,7 @@ async function init(){
 }
 
 async function load(d){
-  D = await getJSON(`data/${d}.json`);
+  D = await getJSON(`${BASE}${d}.json`);
   D.sectors.forEach(s => s.dev = s.day_share == null ? 0 : s.day_share - s.base);
   selSector = null; selWin = null; $('#detail').hidden = true;
   renderHead(); renderSeg(); renderHeat();

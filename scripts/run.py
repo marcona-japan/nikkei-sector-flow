@@ -31,6 +31,21 @@ JST = timezone(timedelta(hours=9))
 DELAY_MIN = 20  # Yahooの東証データ遅延
 BASE_DAYS = 20  # 比較基準＝過去20営業日の平均シェア
 PAGE_URL = os.environ.get("PAGE_URL", "")
+UNIVERSE = "n225"
+LABEL = "日経225"
+
+
+def configure(universe: str) -> None:
+    """集計対象（日経225 / グロース250）ごとに出力先・送信記録・表示名を切り替える"""
+    global UNIVERSE, LABEL, OUT, STATE, WSTATE, PAGE_URL
+    UNIVERSE = universe
+    if universe == "g250":
+        LABEL = "グロース250"
+        OUT = ROOT / "docs" / "data" / "g250"
+        STATE = ROOT / "data" / "notified_g250.txt"
+        WSTATE = ROOT / "data" / "notified_windows_g250.json"
+        if PAGE_URL:
+            PAGE_URL = PAGE_URL.rstrip("/") + "/?u=g250"
 
 # (key, 表示名, 開始, 終了)  ※終了は含まない。大引けは引けの板寄せを含むよう16:00まで
 WINDOWS = [
@@ -224,6 +239,7 @@ def compute(cons: pd.DataFrame, daily: pd.DataFrame, intra: pd.DataFrame,
         "closing_added": round(closing_added),
         "stocks": stocks,
         "slots": slots,
+        "universe": UNIVERSE,
         "note": "売買代金はYahoo Financeの5分足から概算（約20分遅れ）。基準は過去20営業日の業種別シェア平均。",
     }
 
@@ -273,7 +289,7 @@ def report(d: dict) -> dict:
     am, pm = half([0, 1, 2]), half([3, 4, 5])
     mv = sorted(((pm[k] - am[k], k) for k in am), reverse=True)
     return {
-        "title": f"📊 日経225 資金移動（東証33業種）{dt.month}/{dt.day}({wd})",
+        "title": f"📊 {LABEL} 資金移動（東証33業種）{dt.month}/{dt.day}({wd})",
         "total": tot,
         "in": "\n".join(row(i + 1, s) for i, s in enumerate(up)) or "なし",
         "out": "\n".join(row(i + 1, s) for i, s in enumerate(dn)) or "なし",
@@ -309,7 +325,7 @@ def send_discord(r: dict) -> bool:
     if PAGE_URL:
         embed["url"] = PAGE_URL
         embed["fields"].append({"name": "🔗 6区間の流れ", "value": PAGE_URL, "inline": False})
-    res = requests.post(url, json={"username": "セクター資金移動", "embeds": [embed]}, timeout=30)
+    res = requests.post(url, json={"username": f"セクター資金移動（{LABEL}）", "embeds": [embed]}, timeout=30)
     print("Discord:", res.status_code, res.text[:200])
     res.raise_for_status()
     return True
@@ -352,21 +368,21 @@ def slot_embeds(d: dict, k: int, n_sec: int = 1, n_stock: int = 5) -> list[dict]
     prev_label = prev["label"] if prev else "20日平均"
     out = []
     if ups:
-        out.append({"title": f"🟥 {sl['label']} 資金流入 1位　{dt.month}/{dt.day}({wd})",
+        out.append({"title": f"🟥 {LABEL} {sl['label']} 資金流入 1位　{dt.month}/{dt.day}({wd})",
                     "description": f"{prev_label} → {sl['label']} で売買代金シェアが増えた業種と、その枠で売買代金の多い銘柄。株価は現在値・前日差・前日比（約20分遅れ）",
                     "color": 0xD03B3B,
                     "fields": [{"name": f"{i}. {sec}　+{dl:.2f}pt（シェア {cur:.1f}%）",
                                 "value": stock_lines(sec, sl["tops"]), "inline": False}
                                for i, (dl, cur, sec) in enumerate(ups, 1)]})
     if dns:
-        out.append({"title": f"🟦 {sl['label']} 資金流出 1位",
+        out.append({"title": f"🟦 {LABEL} {sl['label']} 資金流出 1位",
                     "description": f"シェアが減った業種と、主な銘柄（前の枠で売買代金が多かった銘柄を優先）",
                     "color": 0x2A78D6,
                     "fields": [{"name": f"{i}. {sec}　{dl:.2f}pt（シェア {cur:.1f}%）",
                                 "value": stock_lines(sec, tops_prev if tops_prev.get(sec) else sl["tops"]),
                                 "inline": False}
                                for i, (dl, cur, sec) in enumerate(dns, 1)],
-                    "footer": {"text": "日経225構成銘柄・Yahoo Financeの5分足から概算。投資判断はご自身で。"}})
+                    "footer": {"text": f"{LABEL}構成銘柄・Yahoo Financeの5分足から概算。投資判断はご自身で。"}})
     if PAGE_URL and out:
         out[0]["url"] = PAGE_URL
     return out
@@ -377,7 +393,7 @@ def send_embeds(embeds: list[dict]) -> bool:
     if not url:
         print("DISCORD_WEBHOOK_URL 未設定のため送信スキップ")
         return False
-    res = requests.post(url, json={"username": "セクター資金移動", "embeds": embeds}, timeout=30)
+    res = requests.post(url, json={"username": f"セクター資金移動（{LABEL}）", "embeds": embeds}, timeout=30)
     print("Discord:", res.status_code, res.text[:200])
     res.raise_for_status()
     return True
@@ -409,11 +425,13 @@ def main() -> None:
     ap.add_argument("--date", help="集計日 YYYY-MM-DD（省略時は今日）")
     ap.add_argument("--notify", choices=["auto", "force", "off"], default="auto",
                     help="auto=引け後に1日1回 / force=必ず送る / off=送らない")
+    ap.add_argument("--universe", choices=["n225", "g250"], default="n225", help="n225=日経225 / g250=グロース250")
     a = ap.parse_args()
+    configure(a.universe)
 
     now = datetime.now(JST)
     target = date.fromisoformat(a.date) if a.date else now.date()
-    cons = constituents.load()
+    cons = constituents.load_universe(UNIVERSE)
     daily, intra = fetch(cons["code"].tolist())
     data = compute(cons, daily, intra, target, now)
     if data is None:

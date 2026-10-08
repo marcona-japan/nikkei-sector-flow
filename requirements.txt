@@ -8,3 +8,4 @@ beautifulsoup4
 xlrd>=2.0
 openpyxl
 jpholiday
+pdfplumber
