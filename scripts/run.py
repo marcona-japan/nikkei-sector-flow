@@ -357,10 +357,11 @@ def slot_embeds(d: dict, k: int, n_sec: int = 1, n_stock: int = 5) -> list[dict]
             if not st:
                 continue
             _, px, chg, pct = st
-            mark = "🔺" if chg > 0 else "🔽" if chg < 0 else "➖"
+            mark = "🔴" if chg > 0 else "🔵" if chg < 0 else "⚪"
             pxs = f"{px:,.0f}" if px >= 100 else f"{px:,.1f}"
             chs = f"{chg:+,.0f}" if abs(chg) >= 10 else f"{chg:+,.1f}"
-            lines.append(f"{mark} `{code}` {name[:10]} **{pxs}円**（{chs}円 / {pct:+.2f}%）")
+            word = "上げ" if chg > 0 else "下げ" if chg < 0 else "変わらず"
+            lines.append(f"{mark}{word} `{code}` {name[:10]} **{pxs}円**（{chs}円 / **{pct:+.2f}%**）")
         return "\n".join(lines)[:1024] or "銘柄データなし"
 
     dt = datetime.fromisoformat(d["date"])
