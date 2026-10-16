@@ -15,7 +15,7 @@ on:
       notify:
         description: "Discord通知"
         type: choice
-        options: ["off", "auto", "force"]
+        options: ["off", "auto", "force", "slot"]
         default: "off"
 
 permissions:

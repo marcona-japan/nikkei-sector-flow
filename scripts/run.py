@@ -424,7 +424,7 @@ def notify_slot(d: dict, mode: str) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="集計日 YYYY-MM-DD（省略時は今日）")
-    ap.add_argument("--notify", choices=["auto", "force", "off"], default="auto",
+    ap.add_argument("--notify", choices=["auto", "force", "off", "slot"], default="auto",
                     help="auto=引け後に1日1回 / force=必ず送る / off=送らない")
     ap.add_argument("--universe", choices=["n225", "g250"], default="n225", help="n225=日経225 / g250=グロース250")
     a = ap.parse_args()
@@ -442,7 +442,7 @@ def main() -> None:
     print(f"書き出し: {target} final={data['final']} 合計{yen(data['day_total'])}")
 
     try:
-        notify_slot(data, a.notify)
+        notify_slot(data, "force" if a.notify == "slot" else a.notify)
     except Exception as e:  # noqa: BLE001  場中速報の失敗で日次処理を止めない
         print("場中速報の送信失敗:", e)
 
