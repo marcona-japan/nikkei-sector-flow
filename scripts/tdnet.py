@@ -146,11 +146,21 @@ def main() -> None:
     days = [date.fromisoformat(a.date)] if a.date else [today - timedelta(days=1), today]
 
     found: list[dict] = []
+    ok_days = 0
     for d in days:
-        for it in fetch_day(d):
+        try:
+            items = fetch_day(d)
+        except Exception as e:  # noqa: BLE001  データ元の一時的な不調は次の回で取り直すので失敗扱いにしない
+            print(f"[{d}] 取得できませんでした（次の回で再取得します）: {e}")
+            continue
+        ok_days += 1
+        for it in items:
             x = normalize(it, watch)
             if x:
                 found.append(x)
+    if not ok_days:
+        print("TDnetのデータ元に接続できないため、今回はスキップします")
+        return
     found.sort(key=lambda x: (x["time"], x["code"]))
     print(f"監視{len(watch)}銘柄のうち該当開示 {len(found)}件")
     for x in found:
