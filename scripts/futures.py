@@ -7,12 +7,22 @@ from __future__ import annotations
 
 # (表示名, ティッカー, 単位, 小数桁)
 ITEMS = [
+    ("為替", [
+        ("ドル円", "JPY=X", "円", 2),
+        ("ユーロ円", "EURJPY=X", "円", 2),
+        ("ドルインデックス", "DX-Y.NYB", "", 2),
+    ]),
+    ("米国債利回り", [
+        ("米10年", "^TNX", "%", 3),
+        ("米2年", "2YY=F", "%", 3),
+    ]),
     ("株価指数先物", [
         ("日経225先物（CME円建て）", "NIY=F", "", 0),
         ("NYダウ先物", "YM=F", "", 0),
         ("ナスダック100先物", "NQ=F", "", 2),
         ("S&P500先物", "ES=F", "", 2),
         ("VIX（恐怖指数）", "^VIX", "", 2),
+        ("SOX（米半導体株指数）", "^SOX", "", 2),
     ]),
     ("商品先物", [
         ("WTI原油", "CL=F", "ドル", 2),
@@ -55,11 +65,13 @@ def embed() -> dict | None:
             px, pv = q[t]
             chg, pct = px - pv, (px / pv - 1) * 100 if pv else 0
             mark = "🔴" if chg > 0 else "🔵" if chg < 0 else "⚪"
-            # VIXは上がる＝不安が強まる
-            ls.append(f"{mark} {name} **{px:,.{dp}f}{unit}**（{chg:+,.{dp}f} / {pct:+.2f}%）")
+            if unit == "%":  # 利回りは前日差をbp（0.01%）で
+                ls.append(f"{mark} {name} **{px:.{dp}f}%**（{chg * 100:+.1f}bp）")
+            else:
+                ls.append(f"{mark} {name} **{px:,.{dp}f}{unit}**（{chg:+,.{dp}f} / {pct:+.2f}%）")
         if ls:
             fields.append({"name": group, "value": "\n".join(ls), "inline": False})
-    return {"title": "🌅 朝の先物・商品・BTC", "color": 0x0B0B0B, "fields": fields,
+    return {"title": "🌅 朝のマーケット（為替・金利・先物・商品・BTC）", "color": 0x0B0B0B, "fields": fields,
             "footer": {"text": "Yahoo Finance（遅延あり）。前日比は前営業日の終値比。TOPIX先物はデータ元にないため未掲載。"}}
 
 
