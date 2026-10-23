@@ -2,7 +2,7 @@ name: 本日のFX指標（朝）
 
 on:
   schedule:
-    - cron: "30 22 * * 0-4"   # 平日 7:30 JST
+    - cron: "30 22 * * 0-5"   # 月〜土 7:30 JST（土曜は先物・BTCのみ）
   workflow_dispatch:
     inputs:
       notify:
@@ -18,7 +18,7 @@ on:
 jobs:
   today:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install requests yfinance
       - name: 通知
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

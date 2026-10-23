@@ -81,10 +81,19 @@ def main() -> None:
     ap.add_argument("--date", help="YYYY-MM-DD（テスト用）")
     a = ap.parse_args()
     today = date.fromisoformat(a.date) if a.date else datetime.now(JST).date()
-    embed = build(today)
-    print(json.dumps(embed, ensure_ascii=False, indent=1))
-    if a.notify == "on":
-        notify.send([embed], "FX指標アラート", "market")
+    embeds = []
+    try:  # 先物・商品・BTC（土曜朝も送る）
+        import futures
+        fe = futures.embed()
+        if fe:
+            embeds.append(fe)
+    except Exception as e:  # noqa: BLE001
+        print("先物の取得失敗:", e)
+    if today.weekday() < 5:  # 指標の予定は平日だけ
+        embeds.append(build(today))
+    print(json.dumps(embeds, ensure_ascii=False, indent=1))
+    if a.notify == "on" and embeds:
+        notify.send(embeds, "朝のマーケット", "market")
 
 
 if __name__ == "__main__":
