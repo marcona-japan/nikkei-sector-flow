@@ -1,0 +1,60 @@
+== mexc 200 len=614629
+XAU_USDT last=3992.44 rise=0.0004
+SILVER_USDT last=53.55 rise=0.0024
+USOIL_USDT last=103 rise=-0.0073
+XAUT_USDT last=3985.82 rise=0.0004
+UKOIL_USDT last=111.29 rise=-0.0042
+SPX_USDT last=0.3567 rise=0.0525
+NAS100_USDT last=28939 rise=0.0031
+SPX500_USDT last=7631.6 rise=0.0017
+MRNASTOCK_USDT last=201.15 rise=-0.013
+SILVER_USDC last=53.56 rise=0.0029
+XAU_USDC last=3987.37 rise=0.0008
+XAUT_USDC last=3983.2 rise=0.0008
+BANANAS31_USDT last=0.006012 rise=0.024
+JP225_USDT last=62731 rise=0.001
+US30_USDT last=52290.74 rise=0.0003
+SPX500_USDC last=7613.3 rise=0.0017
+SILVER_USD1 last=53.51 rise=0.0056
+USOIL_USD1 last=103.12 rise=-0.006
+XAUT_USD1 last=3987.8 rise=0.0007
+PANASONICSTOCK_USDT last=23.21 rise=-0.0004
+UKOIL_USD1 last=111.55 rise=-0.003
+NAS100_USD1 last=28920 rise=0.0018
+GOLDCIRSTOCK_USDT last=34.26 rise=-0.0011
+SPX500_USD1 last=7624.9 rise=0.0026
+== ig_ws 200 len=768845
+titles=['Weekend Wall Street | Live Weekend Wall Street Stock Index Price | ', 'Weekend Wall Street | IG UK  - IG UK', 'Weekend Wall Street [UK]', 'weekend-wall-street', 'Weekend Wall Street | Live Weekend Wall Street Stock Index Price | ', 'Weekend Wall Street | IG UK', 'Weekend Wall Street [UK]', 'weekend-wall-street', 'weekend-trading', 'Weekend trading ']
+nums=[]
+snip=<!DOCTYPE html>
+<!--[if IE 10]><html class="ie10 nojs" lang="en-GB" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml">
+<![endif]-->
+<!--[if gt IE 10]><!-->
+<html class="gtie10 nojs" lang="en-GB" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml">
+<!--<![endif]--> <head> <meta charset="utf-8"/>
+<meta na
+== ig_wt 200 len=335849
+titles=['weekend-trading\\', 'weekend-trading\\', 'weekend\\', 'weekend-trading\\', 'Weekend Trading | Saturday and Sunday Trading on Wall Street, DAX, ', 'weekend off, so why should you? Trade on the weekend with IG, inclu', 'weekend trading, trade weekends, ftse 100 weekend trading', 'weekend-trading', 'Weekend Trading | Saturday and Sunday Trading on Wall Street, DAX, ', 'weekend off, so why should you? Trade on the weekend with IG, inclu']
+nums=[]
+snip=<!DOCTYPE html><html lang="en" data-mantine-color-scheme="light" class="gtamerica_1957e29f-module__acgWga__variable gtamericaexpanded_87c7e01b-module__FCPqOW__variable gtamericaextraexpanded_58be6e3f-module__Oqta-W__variable biancoserif_4319c9fb-module__CsHu_q__variable icomoon_6d21c9aa-module__quaRjq__variable"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/sb-resources/_next/static/chunks/0qq8dvck9z06~.css" data-p
+== ig_jp 200 len=724237
+titles=['Weekend Wall Street', 'Weekend Wall Street [JP]', 'weekend-wall-street', 'Weekend Wall Street', 'Weekend Wall Street [JP]', 'weekend-wall-street', 'Weekend Wall Street', 'Weekend Wall Street 上昇率トップ', 'Weekend Wall Street 下落率トップ', 'Weekend Wall Street 上昇率トップ']
+nums=[]
+snip=<!DOCTYPE html>
+<!--[if IE 10]><html class="ie10 nojs" lang="ja-JP" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml">
+<![endif]-->
+<!--[if gt IE 10]><!-->
+<html class="gtie10 nojs" lang="ja-JP" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml">
+<!--<![endif]--> <head> <meta charset="utf-8"/>
+<meta na
+== okx_swap 200 len=154645
+ORCL-USDT-SWAP 125.66 open24=125.85
+SPX-USDT-SWAP 0.3563 open24=0.3503
+XAG-USDT-SWAP 53.55 open24=53.65
+CRCL-USDT-SWAP 84.64 open24=84.76
+XAU-USDT-SWAP 3993.5 open24=3999
+CL-USDT-SWAP 103.16 open24=103.76
+== bybit 403 len=96
+== bybit ERR Expecting property name enclosed in double quotes: line 2 column 5 (char 6)
+== hyperliquid 200 SPX,PAXG
+== hl perpDexs [null,{"name":"xyz","fullName":"XYZ","deployer":"0x88806a71d74ad0a510b350545c9ae490912f0888","oracleUpdater":null,"feeRecipient":"0x83ffcfb1f2ad843c474b2e28df86c721cb869d3a","assetToStreamingOiCap":[["xyz:AAOI","25000000.0"],["xyz:AAPL","200000000.0"],["xyz:ALUMINIUM","25000000.0"],["xyz:AMAT","25000000.0"],["xyz:AMD","100000000.0"],["xyz:AMZN","100000000.0"],["xyz:ARM","50000000.0"],["xyz:ASML","25000000.0"],["xyz:AVGO","75000000.0"],["xyz:BABA","50000000.0"],["xyz:BB","75000000.0"],["xyz:BE","25000000.0"],["xyz:BIRD","25000000.0"],["xyz:BMNR","25000000.0"],["xyz:BOT","25000000.0"],["xyz:BRENTOIL","750000000.0"],["xyz:BX","25000000.0"],["xyz:CAMBRICON","25000000.0"],["xyz:CBRS","150000000.0"],["xyz:CL","1000000000.0"],["xyz:COIN","50000000.0"],["xyz:COPPER","300000000.0"],["xyz:CORN","25000000.0"],["xyz:COST","25000000.0"],["xyz:CRCL","250000000.0"],["xyz:CRWD","25000000.0"],["xyz:CRWV","150000000.0"],["xyz:CVX","25000000.0"],["xyz:CXMT","250000000.0"],["xyz:DELL","25000000.0"],["xyz:DKNG","25000000.0"],["xyz:DRAM","250000000.0"],["xyz:DXY","25000000.0"],["xyz:EBAY","25000000.0"],["xyz:EUR","100000000.0"],["xyz:EWJ","25000000.0"],["xyz:EWT","25000000.0"],["xyz:EWY","100000000.0"],["xyz:EWZ","25000000.0"],["xyz:GBP","25000000.0"],["xyz:GEV","25000000.0"],["xyz:GIGADEV","25000000.0"],["xyz:GLW","25000000.0"],["xyz:GME","50000000.0"],["xyz:GOLD","750000000.0"],["xyz:GOOGL","350000000.0"],["xyz:H100","25000000.0"],["xyz:HIMS","25000000.0"],["xyz:HO","25000000.0"],["xyz:HOOD","15
