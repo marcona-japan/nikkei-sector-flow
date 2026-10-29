@@ -35,16 +35,25 @@ def num(s: str) -> float | None:
         return None
 
 
+DIAG: list[str] = []
+
+
 def quote(sess: requests.Session, code: str) -> tuple[str, list] | None:
     try:
-        h = sess.get(f"https://finance.yahoo.co.jp/quote/{code}.T", timeout=20).text
-    except Exception:  # noqa: BLE001
+        r = sess.get(f"https://finance.yahoo.co.jp/quote/{code}.T", timeout=20)
+        h = r.text
+        if r.status_code != 200:
+            DIAG.append(f"{code}: HTTP {r.status_code}")
+            return None
+    except Exception as e:  # noqa: BLE001
+        DIAG.append(f"{code}: {e}")
         return None
     u = h.replace('\\\\"', '"').replace('\\"', '"')
     px = re.search(r'"priceBoard":\{.*?"price":\{"value":"([\d,.]+)"', u)
     pv = re.search(r'"previousPrice":\{"name":"前日終値","value":"([\d,.]+)"', u)
     tv = re.search(r'"tradingValue":\{"name":"売買代金","value":"([\d,.]+)"', u)
     if not (px and pv):
+        DIAG.append(f"{code}: 読み取り失敗 px={bool(px)} pv={bool(pv)} tv={bool(tv)} len={len(h)}")
         return None
     return code, [num(px.group(1)), num(pv.group(1)), (num(tv.group(1)) or 0) * 1000 if tv else 0.0]
 
@@ -90,6 +99,9 @@ def main() -> None:
 
     q = snapshot(cons["code"].tolist())
     print(f"{now:%H:%M} 取得 {len(q)}/{len(cons)} 銘柄")
+    diag = ROOT / "data" / "rt" / f"status_{a.universe}.txt"
+    diag.parent.mkdir(parents=True, exist_ok=True)
+    diag.write_text(f"{now:%Y-%m-%d %H:%M} 取得 {len(q)}/{len(cons)}\n" + "\n".join(DIAG[:20]))
     if len(q) < len(cons) * 0.8:
         print("取得できた銘柄が少ないため、今回は記録・通知しません")
         return
