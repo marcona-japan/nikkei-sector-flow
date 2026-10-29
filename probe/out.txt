@@ -1,0 +1,4 @@
+status 200 359406 1.23s
+30 pages: ok=30 10.1s statuses=[200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200]
+https://finance.yahoo.co.jp/quote/7203.T,6758.T -> 200 356830
+https://finance.yahoo.co.jp/stocks/ranking/tradingValueHigh?market=all&page=2 -> 200 224879
