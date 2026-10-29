@@ -126,6 +126,7 @@ def git_sync(msg: str) -> None:
 
 def run_sync(task: dict) -> None:
     now = datetime.now(JST)
+    sh("git", "pull", "--rebase", "-q")  # 最新のスクリプトで実行する
     if task["cmd"] == ["@sector"]:
         for extra in ([], ["--universe", "g250"]):
             p = sh(PY, "scripts/run.py", "--notify", "auto", *extra)
@@ -207,6 +208,7 @@ def main() -> None:
             if t["kind"] == "sync":
                 run_sync(t)
             else:
+                sh("git", "pull", "--rebase", "-q")
                 bg.append(subprocess.Popen([PY, *t["cmd"]], cwd=ROOT))
                 git_sync(f"scheduler: {t['key']}")
             changed = False
