@@ -1,4 +1,13 @@
-status 200 359406 1.23s
-30 pages: ok=30 10.1s statuses=[200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200]
-https://finance.yahoo.co.jp/quote/7203.T,6758.T -> 200 356830
-https://finance.yahoo.co.jp/stocks/ranking/tradingValueHigh?market=all&page=2 -> 200 224879
+state idx -1: ''
+[売買代金] 'li>   売買代金   <a href="https://finance.yahoo.co.jp/feature/spe'
+[売買代金] 'li>   売買代金     <span class="_StyledNum'
+[売買代金] 'BasicHeader_57fcd_10 _BasicHeader--mp_57fcd_55">  売買代金     <span class="a_RE9G_CashMarginTradingBreakdown__tradingTyp'
+[出来高] 'li>   出来高   <a href="https://finance.yahoo.co.jp/feature/spec'
+[出来高] 'li>   出来高     <span class="_StyledNumb'
+[出来高] 'BasicHeader_57fcd_10 _BasicHeader--mp_57fcd_55">  出来高     <span class="a_RE9G_CashMarginTradingBreakdown__tradingType'
+[リアルタイム] '">   [{"@context":"https://schema.org","@type":"WebSite","name":"Yahoo!ファイナンス - 株価・最新ニュース","description":"リアルタイム株価、最新ニュース、株式掲示板などを提供する、投資やマネーの総合情報サイトです。株価指数、外国為替相場、日本株、米国株など、投資判断に役立つ情報を掲載しています。","url":"https://finance.yahoo.co.jp/","publisher":{"@type":"Corporation","address":{"@type":"PostalAddress","add'
+[リアルタイム] '>    リアルタイム株価   11:30      夜間PT'
+[リアルタイム] 'lDataListContainer__priceDelayInfo">  リアルタイム表示 <a href="/brokers-hikaku/ranking/stock-commission-securities?channel=y_internal&amp;srv=finance_pc_stocksdetail" data-cl-params="_cl_link:commissn;_cl_position:0" class="mr3TzW_DetailDataL'
+[tradingValue] '":\\"\xa0\\"},\\"sellExecution\\":{\\"cashString\\":\\"\xa0\\",\\"marginOpenString\\":\\"\xa0\\",\\"marginCloseString\\":\\"\xa0\\",\\"shortSellString\\":\\"\xa0\\"},\\"total\\":\\"\xa0\\"},\\"tradingValue\\":{\\"buyExecution\\":{\\"cashString\\":\\"\xa0\\",\\"marginOpenString\\":\\"\xa0\\",\\"marginCloseString\\":\\"\xa0\\"},\\"sellExecution\\":{\\"cashString\\":\\"\xa0\\",\\"marginOpenString\\":\\"\xa0\\",\\"marginCloseString\\":'
+[tradingValue] '\\":\\"出来高\\",\\"value\\":\\"7,785,100\\",\\"updateDate\\":\\"11:30\\",\\"updateDateMeta\\":\\"2026-10-29T11:30:00+09:00\\",\\"suffix\\":\\"株\\",\\"isRealTime\\":false},\\"tradingValue\\":{\\"name\\":\\"売買代金\\",\\"value\\":\\"23,887,419\\",\\"updateDate\\":\\"11:30\\",\\"updateDateMeta\\":\\"2026-10-29T11:30:00+09:00\\",\\"suffix\\":\\"千円\\",\\"isRealTime\\":false},\\"per\\":{\\"name\\":\\"PER\\",\\'
+[tradingValue] 'ighPrice\\":\\"3,064.9\\",\\"highPriceTime\\":\\"22:49\\",\\"lowPrice\\":\\"3,045\\",\\"lowPriceTime\\":\\"17:09\\",\\"volume\\":\\"17,100\\",\\"volumeTime\\":\\"23:47\\",\\"tradingValue\\":\\"52,210\\",\\"tradingValueTime\\":\\"23:47\\",\\"fileUpdateStopFlag\\":false,\\"priceTimeUpdateStopFlag\\":false,\\"displayTimeFlag\\":false}}]]}]\\n94:I[66599,[\\"$4\\",\\"$1f\\",\\"$20\\",\\"$21\\",\\"$2'
