@@ -13,7 +13,6 @@ import json
 import re
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -40,8 +39,8 @@ DIAG: list[str] = []
 
 
 def quote(sess: requests.Session, code: str) -> tuple[str, list] | None:
-    h = ""
-    for attempt in range(4):  # 混雑時は 500 が返るので、少し待ってやり直す
+    h, err = "", ""
+    for attempt in range(2):
         try:
             r = sess.get(f"https://finance.yahoo.co.jp/quote/{code}.T", timeout=20)
             if r.status_code == 200:
@@ -50,7 +49,7 @@ def quote(sess: requests.Session, code: str) -> tuple[str, list] | None:
             err = f"HTTP {r.status_code}"
         except Exception as e:  # noqa: BLE001
             err = str(e)
-        time.sleep(2 + attempt * 3)
+        time.sleep(3)
     if not h:
         DIAG.append(f"{code}: {err}")
         return None
@@ -65,11 +64,23 @@ def quote(sess: requests.Session, code: str) -> tuple[str, list] | None:
 
 
 def snapshot(codes: list[str]) -> dict:
+    """1銘柄ずつ間隔を空けて取得（一度に大量に読むと Yahoo に一時的に止められるため）。
+    連続して失敗したら打ち切る"""
     sess = requests.Session()
     sess.headers.update(UA)
-    with ThreadPoolExecutor(max_workers=3) as ex:
-        res = [r for r in ex.map(lambda c: quote(sess, c), codes) if r]
-    return dict(res)
+    out, fails = {}, 0
+    for c in codes:
+        r = quote(sess, c)
+        if r:
+            out[r[0]] = r[1]
+            fails = 0
+        else:
+            fails += 1
+            if fails >= 8:
+                DIAG.append("連続して取得できないため打ち切り")
+                break
+        time.sleep(0.35)
+    return out
 
 
 def slot_shares(cur: dict, prev: dict | None, sec_of: dict, name_of: dict) -> dict:
