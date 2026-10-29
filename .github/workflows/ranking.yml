@@ -1,9 +1,7 @@
 name: マーケット速報（ランキング）
 
 on:
-  schedule:
-    - cron: "40 2 * * 1-5"   # 11:40 JST 前場引け
-    - cron: "40 6 * * 1-5"   # 15:40 JST 大引け
+  # 定時実行は常駐スケジューラー（scheduler.yml）に移行。手動実行用に残す
   workflow_dispatch:
     inputs:
       session:
