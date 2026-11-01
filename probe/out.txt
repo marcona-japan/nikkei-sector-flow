@@ -1,57 +1,441 @@
-[評価損益率] 料を全額負担します。 詳しくはこちら" /></a> </li> <li> <a href="#"> <img src="/assets/www/v2/images/img_header_bnr_02.png" alt="会員限定配信 当日更新分 信用評価損益率 相場の天井・低値圏を探る！ 詳しくはこちら" /></a> </li> </ul> </div>--> </div> <div class="global-header-sub-menu__contents" data-dropdown="market"> <div class="global-header-sub-menu__category"> <button type="button" class="glob
+グロース投資指標</a>
+</div>
+</div>
+</div>
 
-[評価損益率] se; } </script> <div class="u-text-center"> <a href="/info/netstock-info-01/" class="image-link" target="_blank"> <img src="/market/stock/netstock-info/image/img_netstock-info_03.png" alt="今の相場は天井？底？ 評価損益率から探ろう！" width="640" height="160"> </a> </div> </div> </div> <div class="section"> <div class="tab-group"> <div class="tab-list tab-scroll-list"> <button class="tab-button is-active">前営業日更新分</button> <a href="/market/stock/netstock-info/latest.ht
+<!--
+<section class="section">
+<ul class="list theme-list-asterisk theme-plus-color">
+<li><b>2026年9月7日(月)午前0時から午前6時まで、メンテナンスのため一時的にコンテンツが表示されない時間帯がございます。</b></li>
+</ul>
+</section>
+-->
 
-[評価損益率] <a href="/market/stock/today/today.html?mnu=sd">本日の銘柄情報</a> </li> <li> <a href="/market/stock/regulations/kisei.html?mnu=sd">当社取引規制</a> </li> <li> <a href="/market/stock/netstock-info/rate/?mnu=sd">信用評価損益率のご紹介</a> </li> <li> <a href="/market/stock/netstock-info/?mnu=sd">投資指標(松井証券店内)</a> </li> <li> <a href="/market/stock/rights-offerings/?mnu=sd">ライツ・オファリング</a> </li> <li> <a href="/market/stock/link/?mnu=sd">情報開示関連リンク</a> </li> </ul> </li> </ul> <
+<div id="new_ranking_index" class="section u-pt0">
 
-[/netstock] ﻿<!DOCTYPE html> <html lang="ja"> <head> <meta charset="UTF-8"> <link rel="canonical" href="https://www.matsui.co.jp/market/stock/netstock-info/"> <meta name="robots" content="index,follow"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="format-detection" content="telephone=no"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>投資
-
-[/netstock] operty="og:title" content="【松井証券】投資指標(松井証券店内) | マーケット情報"> <meta property="og:description" content="「投資指標(松井証券店内)」をご紹介します。【松井証券】"> <meta property="og:url" content="https://www.matsui.co.jp/market/stock/netstock-info/"> <meta property="og:type" content="article"> <meta property="og:image" content="https://www.matsui.co.jp/assets/www/v2/images/sns/logo.jpg"> <meta property="fb:admins" content="399874296703303"> <link rel="icon" href="/favicon.ico"> 
-
-[/netstock] cebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`; window.open(shareUrl, 'facebook-share-dialog', 'width=680,height=350'); return false; } </script> <div class="u-text-center"> <a href="/info/netstock-info-01/" class="image-link" target="_blank"> <img src="/market/stock/netstock-info/image/img_netstock-info_03.png" alt="今の相場は天井？底？ 評価損益率から探ろう！" width="640" height="160"> </a> </div> </div> </div> <div class="section"> <div class="tab-group
-
-[/netstock] l, 'facebook-share-dialog', 'width=680,height=350'); return false; } </script> <div class="u-text-center"> <a href="/info/netstock-info-01/" class="image-link" target="_blank"> <img src="/market/stock/netstock-info/image/img_netstock-info_03.png" alt="今の相場は天井？底？ 評価損益率から探ろう！" width="640" height="160"> </a> </div> </div> </div> <div class="section"> <div class="tab-group"> <div class="tab-list tab-scroll-list"> <button class="tab-button is-active">
-
-[/netstock] eight="160"> </a> </div> </div> </div> <div class="section"> <div class="tab-group"> <div class="tab-list tab-scroll-list"> <button class="tab-button is-active">前営業日更新分</button> <a href="/market/stock/netstock-info/latest.html" class="tab-button"><img style="display:inline" alt="会員限定" src="/market/stock/image/icn_member-only_01.png">当日更新分</a> <a href="/market/stock/netstock-info/growth.html" class="tab-button"><img style="display:inline" alt="会員限
-
-[/netstock] 分</button> <a href="/market/stock/netstock-info/latest.html" class="tab-button"><img style="display:inline" alt="会員限定" src="/market/stock/image/icn_member-only_01.png">当日更新分</a> <a href="/market/stock/netstock-info/growth.html" class="tab-button"><img style="display:inline" alt="会員限定" src="/market/stock/image/icn_member-only_01.png">グロース投資指標</a> </div> </div> </div> <!-- <section class="section"> <ul class="list theme-list-asterisk theme-plus-co
-
-[iframe] f); })(window, document, 'script', 'dataLayer', 'GTM-TL6ZFV'); </script> <!-- End Google Tag Manager --> </head> <body data-page-category="market"> <!-- Google Tag Manager (noscript) --> <noscript> <iframe src="//www.googletagmanager.com/ns.html?id=GTM-TL6ZFV" height="0" width="0" style="display:none;visibility:hidden"></iframe> </noscript> <!-- End Google Tag Manager (noscript) --> <header class="global-header" role="banner"> <div class="glob
-
-[iframe] -page-category="market"> <!-- Google Tag Manager (noscript) --> <noscript> <iframe src="//www.googletagmanager.com/ns.html?id=GTM-TL6ZFV" height="0" width="0" style="display:none;visibility:hidden"></iframe> </noscript> <!-- End Google Tag Manager (noscript) --> <header class="global-header" role="banner"> <div class="global-header-sp-container"> <div class="global-header-logo"> <a href="/?mnu=hd"> <img src="/assets/www/v2/images/logo.svg" alt=
-
-[js rate] =o&&(e=b.createElement("table"),t=b.createElement("tr"),n=b.createElement("div"),e.style.cssText="position:absolute;left:-11111px;border-collapse:separate",t.style.cssText="box-sizing:content-box;border:1px solid",t.style.height="1px",n.style.height="9px",n.style.display="block",me.appendChild(e).appendChild(t).appendChild(n),r=i.getComputedStyle(t
-
-[js rate] eaders:{"Content-type":"application/json"}}).then(e=>{if(!e.ok)throw i.hide(),Error(e.statusText);return e.json()}).then(e=>{n.empty();const t=e.body.rate.sort((e,t)=>r.indexOf(e[0])-r.indexOf(t[0]));t.forEach((e,t)=>{const i=e[2][7],s=e[3][7],o=e[0].match(/JPY/)?100:1e4,l=new(vt())(s).minus(i).times(o),c=r.indexOf(e[0]),d=`\n\t\t\t\t\t\t<tr>\n\t\t
-
-[js rate] eaders:{"Content-type":"application/json"}}).then(e=>{if(!e.ok)throw i.hide(),Error(e.statusText);return e.json()}).then(e=>{n.empty();const t=e.body.rate.sort((e,t)=>a.indexOf(e[0])-a.indexOf(t[0]));t.forEach((e,t)=>{const i=a.indexOf(e[0]),s=a[i].split("/")[0].toLowerCase(),l=a[i].split("/")[1].toLowerCase(),c="USD"!==a[i].split("/")[0]?a[i].spli
-
-[js rate] ce(-2),r=("0"+t.getHours()).slice(-2),s=("0"+t.getMinutes()).slice(-2);return`${n}/${i} ${r}:${s}`}(k);const j=`\n\n\t\t\t\t\t\t\t<div class="fx-data-rate-head">\n\t\t\t\t\t\t\t\t<div class="fx-data-rate-pair">\n\t\t\t\t\t\t\t\t\t<img src="/fx/assets/image/flag/${s}_l.png" alt="" width="26" height="18">\n\t\t\t\t\t\t\t\t\t<img src="/fx/assets/image
-
-[js rate] tMinutes()).slice(-2);return`${n}/${i} ${r}:${s}`}(k);const j=`\n\n\t\t\t\t\t\t\t<div class="fx-data-rate-head">\n\t\t\t\t\t\t\t\t<div class="fx-data-rate-pair">\n\t\t\t\t\t\t\t\t\t<img src="/fx/assets/image/flag/${s}_l.png" alt="" width="26" height="18">\n\t\t\t\t\t\t\t\t\t<img src="/fx/assets/image/flag/${l}_l.png" alt="" width="26" height="18">\
-
-[js rate] \t\t\t\t\t\t\t\t<img src="/fx/assets/image/flag/${l}_l.png" alt="" width="26" height="18">\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<p class="fx-data-rate-name">${o[i]}</p>\n\t\t\t\t\t\t\t\t<time class="fx-data-rate-time" data-element="datetime">${k}</time>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<p class="fx-data-rate-balance" data-element="net_chang
-
-[js json] :!0,contentType:"application/x-www-form-urlencoded; charset=UTF-8",accepts:{"*":Vt,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,
-
-[js json] pplication/x-www-form-urlencoded; charset=UTF-8",accepts:{"*":Vt,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"te
-
-[js json] Vt,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":JSON.parse,"text xml":E.parseXML},flatOptions:{url:!0
-
-[js json] "text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":JSON.parse,"text xml":E.parseXML},flatOptions:{url:!0,context
-
-[js json] son:"application/json, text/javascript"},contents:{xml:/\bxml\b/,html:/\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":JSON.parse,"text xml":E.parseXML},flatOptions:{url:!0,context:!0}},ajaxSetup:function(e,t){return t?Kt(Kt(e,E.ajaxSettings),
-
-[js json] /\bhtml/,json:/\bjson\b/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":JSON.parse,"text xml":E.parseXML},flatOptions:{url:!0,context:!0}},ajaxSetup:function(e,t){return t?Kt(Kt(e,E.ajaxSettings),t):Kt(E.ajaxSettings,e)},ajaxPrefilter:Xt(Wt),ajaxTransport:Xt(Yt),aja
-
-[js api/] tps://www.matsui.co.jp/search/?q='+t.word+'">'+t.word+"</a></li>"})}function i(){let e=t.value;if(!e)return;fetch("https://finder.api.mf.marsflag.com/api/v1/finder_service/documents/512fe733/suggest?number_per_suggestion=5&q="+e).then(e=>e.json()).then(e=>{e.suggestions?n(e.suggestions):n(!1)}).catch(e=>{console.error("Error:",e),n(!1)})}["keydown"
-
-[js api/] ,e.show()}}function i(e){return(Math.round(100*e)/100).toLocaleString("jp",{useGrouping:!0})}function r(i){Dt.ajax({url:"https://finance.matsui.co.jp/api/api1?access_token="+i,type:"GET",dataType:"json"}).done(e("nikkei")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api2?access_token="+i,type:"GET",dataType:"json
-
-[js api/] /api/api1?access_token="+i,type:"GET",dataType:"json"}).done(e("nikkei")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api2?access_token="+i,type:"GET",dataType:"json"}).done(e("nikkei_futures")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api3?access_token="+i,type:"GET",dataTy
-
-[js api/] 2?access_token="+i,type:"GET",dataType:"json"}).done(e("nikkei_futures")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api3?access_token="+i,type:"GET",dataType:"json"}).done(t()).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api4?access_token="+i,type:"GET",dataType:"json"}).done
-
-[js api/] ui.co.jp/api/api3?access_token="+i,type:"GET",dataType:"json"}).done(t()).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api4?access_token="+i,type:"GET",dataType:"json"}).done(e("dollar")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api5?access_token="+i,type:"GET",dataType:"json
-
-[js api/] /api/api4?access_token="+i,type:"GET",dataType:"json"}).done(e("dollar")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api5?access_token="+i,type:"GET",dataType:"json"}).done(e("eur")).fail(e=>{console.log("fail",e)}),Dt.ajax({url:"https://finance.matsui.co.jp/api/api6?access_token="+i,type:"GET",dataType:"json"})
+<div class="section">
+<div class="box theme-box-base">
+<header class="box-header">
+<h2 class="box-title theme-box-title-caution"><i class="theme-icon-news"></i>情報が正しく表示できません</h2>
+</header>
+<p>次の2点をご確認ください。</p>
+<ul class="list theme-list-disc box-list">
+<li>広告をブロックするブラウザ拡張機能を使用している場合、情報が表示されないことがあります。</li>
+<li>通信環境が不安定な場合、情報が表示されないことがあります。</li>
+</ul>
+<p class="u-mt30">上記に当てはまらない場合、情報配信が一時的に停止している場合があります。(会員サイト内とは別のシステムによって配信しています。)しばらく時間を空けて、再度アクセスしてください。</p>
+</div>
+</div>
+</div>
+<section class="apply-area">
+<div class="container">
+<h2 class="apply-area-title"> オンラインで最短即日、<br class="u-inline-block md:u-hidden">無料で口座開設 </h2>
+<p class="apply-area-text"> オンラインで申し込みが完結。署名・捺印・書類の郵送は不要です </p>
+<div class="apply-area-buttons">
+<a href="/apply/" class="button theme-register-button theme-account-button">口座開設（無料）</a>
+<a href="/support/contact/" class="button theme-primary-button theme-border-gray">口座開設サポートへご相談</a>
+</div>
+<ul class="apply-area-list">
+<li>
+<a href="/first/flow/" class="link">口座開設からお取引の流れ</a>
+</li>
+<li>
+<a href="/service/io/enter/" class="link">移管（振替）についてはこちら</a>
+</li>
+</ul>
+</div>
+</section>
+<section class="section">
+<div class="box theme-box-base">
+<header class="box-header">
+<h2 class="box-title theme-box-title-alert">
+<i class="theme-icon-alert"></i>ご注意
+</h2>
+</header>
+<p class="text-base">投資指標(松井証券店内)は客観的情報の提供を目的としており、投資等の勧誘または推奨を目的としたものではありません。情報の内容については万全を期しておりますが、その内容を保証するものではありません。投資指標(松井証券店内)によって生じたいかなる損害についても、当社は一切責任を負いません。</p>
+</div>
+</section>
+<section class="section">
+<div class="box theme-box-base">
+<header class="box-header">
+<h2 class="box-title">関連リンク</h2>
+</header>
+<ul class="list theme-list-link">
+<li>
+<a href="/stock/ranking/" class="link" target="_blank">人気銘柄ランキング</a>
+</li>
+<li>
+<a href="/stock/ranking/hot.html " class="link" target="_blank">【会員限定】注目銘柄</a>
+</li>
+<li>
+<a href="/stock/ranking/member01.html " class="link" target="_blank">【会員限定】一日信用ランキング</a>
+</li>
+</ul>
+</div>
+</section>
+<section class="section">
+<div class="box theme-box-base">
+<header class="box-header">
+<h2 class="box-title">リスクおよび手数料などについて</h2>
+</header>
+<ul class="list theme-list-link">
+<li>
+<a href="/disclaimer/stock.html" class="link" target="_blank">現物取引について</a>
+</li>
+<li>
+<a href="/disclaimer/margin.html" class="link" target="_blank">信用取引について</a>
+</li>
+<li>
+<a href="/disclaimer/future.html" class="link" target="_blank">先物・オプション取引について</a>
+</li>
+<li>
+<a href="/disclaimer/d_margin.html" class="link" target="_blank">一日信用取引について</a>
+</li>
+</ul>
+</div>
+</section>
+<nav class="footer-local-nav" role="navigation">
+<ul class="local-footer-nav"></ul><!-- ローカルナビ -->
+</nav><!-- /.footer-local-nav -->
+</div><!-- /.l-content -->
+</div>
+<aside class="l-local-nav" role="complementary">
+<nav class="local-nav" role="navigation" data-local-category="wwwmarket">
+<p class="local-nav-lv2 local-nav-hdg"><a href="/market/?mnu=sd">マーケット情報 (株式市況・株価検索など)</a></p>
+<ul class="local-nav-current"></ul>
+<p class="local-nav-other">
+<span>マーケット情報 その他</span>
+</p>
+<ul class="local-nav-relative">
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>検索</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/screening/index?mnu=sd"> 絞込検索(スクリーニング) </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/complimentary/index?mnu=sd"> 株主優待 検索 </a>
+</p>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>指数・為替・金利</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/stock/index?mnu=sd"> 国内株価指数 </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/stock-overseas/index?mnu=sd"> 海外株価指数 </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/future/index?mnu=sd"> 株価指数先物 </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/fx/index?mnu=sd"> 外国為替 </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/interest-rates/index?mnu=sd"> 政策金利一覧 </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/bonds/index?mnu=sd"> 債券・国債利回り </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/etf/index?mnu=sd"> ETF </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/reit/index?mnu=sd"> REIT </a>
+</p>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>マーケットカレンダー</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/indicators/index?mnu=sd"> 経済指標カレンダー </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/find-by-schedule/index?mnu=sd"> 決算発表カレンダー </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/ipo/index?mnu=sd"> IPOスケジュール </a>
+</p>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>ランキング</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/ranking-rise/index?mnu=sd"> 株式ランキング </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/ranking-industry-rise/index?mnu=sd"> 業種別株式ランキング </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/ranking-day-trading-morning/index?mnu=sd"> デイトレ適性ランキング </a>
+</p>
+</li>
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/ranking-tick/index?mnu=sd"> Tick回数ランキング </a>
+</p>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>銘柄一覧</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://finance.matsui.co.jp/stock-list/index?mnu=sd"> 銘柄一覧 </a>
+</p>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>投資信託</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="https://fund.matsui.co.jp/fund/index.html?mnu=sd"> 投資信託 銘柄情報 </a>
+</p>
+<ul class="local-nav-lv5__list">
+<li>
+<a href="https://fund.matsui.co.jp/fund/search/beginner.html?mnu=sd">投資信託検索</a>
+</li>
+<li>
+<a href="https://fund.matsui.co.jp/fund/search/list/?mnu=sd">投資信託取扱一覧</a>
+</li>
+<li>
+<a href="https://fund.matsui.co.jp/fund/ranking/?mnu=sd">投資信託ランキング</a>
+</li>
+<li>
+<a href="/utility/win/am_report/?mnu=sd">基準価額の変動に関する臨時レポート</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="local-nav-item">
+<p class="local-nav-lv3 local-nav-hdg">
+<span>松井証券内 銘柄情報</span>
+</p>
+<ul class="local-nav-lv3__list">
+<li>
+<p class="local-nav-lv4">
+<a href="/market/stock/?mnu=sd"> 株式 銘柄情報 </a>
+</p>
+<ul class="local-nav-lv5__list">
+<li>
+<a href="/market/stock/today/today.html?mnu=sd">本日の銘柄情報</a>
+</li>
+<li>
+<a href="/market/stock/regulations/kisei.html?mnu=sd">当社取引規制</a>
+</li>
+<li>
+<a href="/market/stock/netstock-info/rate/?mnu=sd">信用評価損益率のご紹介</a>
+</li>
+<li>
+<a href="/market/stock/netstock-info/?mnu=sd">投資指標(松井証券店内)</a>
+</li>
+<li>
+<a href="/market/stock/rights-offerings/?mnu=sd">ライツ・オファリング</a>
+</li>
+<li>
+<a href="/market/stock/link/?mnu=sd">情報開示関連リンク</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</aside>
+</div>
+</main>
+<div class="l-footer">
+<footer class="footer" role="contentinfo">
+<div class="footer-top">
+<div class="footer__inner">
+<ul class="footer-nav">
+<li>
+<ul class="footer-nav__lv2">
+<li><a href="/first/?mnu=ft">はじめての方へ</a></li>
+<li>
+<a href="/study/?mnu=ft">楽しむ・学ぶ</a>
+</li>
+<li><a href="/fee/?mnu=ft">手数料</a></li>
+<li>
+<a href="/product/?mnu=ft">商品一覧</a>
+</li>
+</ul>
+</li>
+<li>
+<ul class="footer-nav__lv2">
+<li>
+<a href="/service/?mnu=ft">サービス</a>
+</li>
+<li><a href="/tool/?mnu=ft">ツール</a></li>
+<li><a href="/market/?mnu=ft">マーケット情報(株式市況・株価検索など)</a></li>
+<li><a href="/support/?mnu=ft">お客様サポート</a></li>
+</ul>
+</li>
+<li class="footer-nav--tool">
+<ul class="footer-nav__lv2">
+<li><a href="/apply/?mnu=ft">口座開設</a></li>
+<li><a href="/campaign/?mnu=ft">キャンペーン</a></li>
+<!--<li><a href="/cm/?mnu=ft">CMギャラリー</a></li>-->
+</ul>
+</li>
+<li class="footer-nav--campaign">
+<ul class="footer-nav__lv2">
+<li><a href="/news/2026/?mnu=ft">ニュースリリース</a></li>
+<li><a href="/company/?mnu=ft" target="_blank" class="link">会社案内・IR情報</a></li>
+</ul>
+</li>
+</ul>
+<ul class="footer-nav">
+<li>
+<ul class="footer-nav__lv2">
+<li>
+<a href="/stock/?mnu=ft">日本株</a>
+<ul class="footer-nav__lv3">
+<li><a href="/stock/domestic/?mnu=ft">現物取引</a></li>
+<li>
+<a href="/stock/margin/?mnu=ft">信用取引</a>
+<ul class="footer-nav__lv4">
+<li><a href="/stock/margin/s-margin/?mnu=ft">制度信用・無期限信用取引</a></li>
+<li><a href="/stock/margin/sh-margin/?mnu=ft">短期信用取引</a></li>
+<li><a href="/stock/margin/d-margin/?mnu=ft">一日信用取引</a></li>
+</ul>
+</li>
+<li><a href="/stock/ipo/?mnu=ft">IPO(新規公開株)、PO(公募・売出し)</a></li>
+<li><a href="/stock/kashikabu/?mnu=ft">貸株サービス</a></li>
+<li><a href="/stock/pts/?mnu=ft">PTS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="footer-nav--stock">
+<ul class="footer-nav__lv3">
+<li><a href="/stock/bunbai/?mnu=ft">立会外分売</a></li>
+<li><a href="/stock/etf-reit/?mnu=ft">ETF/REIT</a></li>
+<li><a href="/stock/special-order/?mnu=ft">逆指値・追跡指値・返済予約注文</a></li>
+<li><a href="/stock/best-match/?mnu=ft">ベストマッチ(約定価格改善サービス)</a></li>
+<li><a href="/stock/cross-trade/?mnu=ft">クロス注文機能</a></li>
+<li><a href="/stock/apply/?mnu=ft">総合口座開設までの流れ</a></li>
+<li><a href="/stock/procedures/?mnu=ft">お取引の流れ</a></li>
+</ul>
+</li>
+<li>
+<ul class="footer-nav__lv2">
+<li><a href="/us-stock/?mnu=ft">米国株</a>
+<ul class="footer-nav__lv3">
+<li><a href="/us-stock/domestic/?mnu=ft">米国株現物取引</a></li>
+<li><a href="/us-stock/margin/?mnu=ft">米国株信用取引</a></li>
+</ul>
+</li>
+<li><a href="/fund/?mnu=ft">投資信託</a>
+<ul class="footer-nav__lv3">
+<li><a href="/fund/fund-value-point/?mnu=ft">最大1%貯まる投信残高ポイントサービス</a></li>
+</ul>
+</li>
+<li><a href="/fx/?mnu=ft">FX</a>
+<ul class="footer-nav__lv3">
+<li><a href="/fx/auto-trading/?mnu=ft">100円から自動売買</a></li>
+</ul>
+</li>
+<li><a href="/bank/?mnu=ft">MATSUI Bank(銀行サービス)</a>
+</li>
+</ul>
+</li>
+<li>
+<ul class="footer-nav__lv2">
+<li>
+<a href="/fop/?mnu=ft">先物・オプション取引</a>
+<ul class="footer-nav__lv3">
+<li><a href="/fop/futures/?mnu=ft">先物取引</a></li>
+<li><a href="/fop/d-futures/?mnu=ft">一日先物取引</a></li>
+<li><a href="/fop/options/?mnu=ft">オプション取引</a></li>
+</ul>
+</li>
+<li>
+<a href="/nisa/?mnu=ft">NISA</a>
+<ul class="footer-nav__lv4">
+<li><a href="/nisa/nisa2023/main/?mnu=ft">旧NISA</a></li>
+<li><a href="/nisa/nisa2023/reserve/?mnu=ft">旧つみたてNISA</a></li>
+</ul>
+</li>
+<li><a href="/ideco/?mnu=ft">iDeCo(個人型確定拠出年金)</a></li>
+<li><a href="/us-mmf/?mnu=ft">米ドルMMF</a></li>
+<li><a href="/utility/sitemap/?mnu=ft">サイトマップ</a></li>
+</ul>
+</li>
+</ul>
+<ul class="footer-nav-sp">
+<li class="footer-nav-sp--first"><a href="/first/?mnu=ft">はじめての方へ</a></li>
+<li><a href="/study/?mnu=ft">楽しむ・学ぶ</a></li>
+<li><a href="/fee/?mnu=ft">手数料</a></li>
+<li><a href="/product/?mnu=ft">商品一覧</a></li>
+<li><a href="/service/?mnu=ft">サービス</a></li>
+<li><a href="/tool/?mnu=ft">ツール</a></li>
+<li><a href="/market/?mnu=ft">マーケット情報(株式市況・株価検索など)</a></li>
+<li><a href="/support/?mnu=ft">お客様サポート</a></li>
+<li><a href="/apply/?mnu=ft">口座開設</a></li>
+<li><a href="/campaign/?mnu=ft">キャンペーン</a></li>
+<!--<li><a href="/cm/?mnu=ft">CMギャラリー</a></li>-->
+<li><a href="/news/2025/?mnu=ft">ニュースリリース</a></li>
+<li><a href="/company/?mnu=ft">会社案内・IR情報</a></li>
+</ul>
+<ul class="footer-nav-sp">
+<li><a href="/stock/?mnu=ft">日本株</a></li>
+<li><a href="/us-stock/?mnu=ft">米国株</a></li>
+<li><a href="/fund/?mnu=ft">投資信託</a></li>
+<li><a href="/fx/?mnu=ft">FX</a></li>
+<li><a href="/fop/?mnu=ft">先物・オプション取引</a></li>
+<li><a href="/nisa/?mnu=ft">NISA</a></li>
+<li><a href="/ideco/?mnu=ft">iDeCo</a></li>
+<li><a href="/us-mmf/?mnu=ft">米ドルMMF</a></li>
+<li><a href="/
