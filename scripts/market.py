@@ -284,6 +284,44 @@ def fmt_yen(v):
     return f"{v / 1e12:.2f}兆円" if v >= 1e12 else f"{v / 1e8:,.0f}億円"
 
 
+def matsui_margin() -> dict:
+    """松井証券「投資指標（松井証券店内）」の信用評価損益率（買い方・売り方）。
+    数値はページ表示後にスクリプトで差し込まれるため、ヘッドレスブラウザで読む。公開分は前営業日更新。"""
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        b = p.chromium.launch()
+        pg = b.new_page(locale="ja-JP", user_agent=UA["User-Agent"])
+        pg.goto("https://www.matsui.co.jp/market/stock/netstock-info/", wait_until="domcontentloaded", timeout=60000)
+        pg.wait_for_selector("text=信用残速報", timeout=30000)
+        t = pg.inner_text("#new_ranking_index")
+        b.close()
+    i = t.find("信用取引指標")
+    seg = t[i:] if i >= 0 else t
+    d = re.search(r"(\d{1,2})/(\d{1,2})\(", seg)
+    sell = re.search(r"売り残\s+([\d,.]+)\s+(-?[\d.]+)", seg)
+    buy = re.search(r"買い残\s+([\d,.]+)\s+(-?[\d.]+)", seg)
+    ratio = re.search(r"倍率\s+([\d.]+)倍", seg)
+    if not (buy and sell):
+        raise RuntimeError("信用評価損益率を読み取れません")
+    return {"md": f"{int(d.group(1))}/{int(d.group(2))}" if d else "",
+            "buy": float(buy.group(2)), "sell": float(sell.group(2)),
+            "buy_amt": num(buy.group(1)), "sell_amt": num(sell.group(1)),
+            "ratio": float(ratio.group(1)) if ratio else None}
+
+
+def margin_gauge(v: float) -> str:
+    """買い方の評価損益率の目安"""
+    if v >= -3:
+        return "🔥 天井圏に注意（買い方がほぼ含み損なし＝過熱）"
+    if v >= -8:
+        return "🟠 強気（上昇相場の通常圏）"
+    if v >= -15:
+        return "⚪ 中立〜やや弱気"
+    if v > -20:
+        return "🔵 弱気（底値圏が近い）"
+    return "🧊 底値圏（投げ売りが出やすい水準。反発の目安）"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--notify", choices=["on", "off"], default="on")
@@ -396,6 +434,22 @@ def main() -> None:
             v += "\n高い業種: " + "、".join(f"{s['name']} {s['ratio']:.1f}%" for s in top)
         fields.append({"name": "🐻 偏り（空売り）", "value": v, "inline": False})
 
+    # 信用評価損益率（松井証券店内）
+    mm = safe(matsui_margin, "信用評価損益率")
+    if mm:
+        hist.setdefault("matsui", {})[mm["md"]] = {"buy": mm["buy"], "sell": mm["sell"]}
+        hm_ = hist["matsui"]
+        keys_m = list(hm_)
+        prev_m = hm_[keys_m[-2]] if len(keys_m) >= 2 and keys_m[-1] == mm["md"] else None
+        chg = f"（前回 {prev_m['buy']:+.2f}% → {mm['buy'] - prev_m['buy']:+.2f}pt）" if prev_m else ""
+        v = (f"{mm['md']}分（松井証券の顧客の信用取引）\n"
+             f"買い方 **{mm['buy']:+.2f}%**{chg}\n"
+             f"売り方 **{mm['sell']:+.2f}%**"
+             + ("（売り方が苦しい＝買い戻しで上がりやすい）" if mm["sell"] <= -10 else "") + "\n"
+             f"目安: {margin_gauge(mm['buy'])}\n"
+             "　0〜-3% 天井圏注意／-3〜-8% 強気／-8〜-15% 中立〜弱気／-15〜-20% 底値圏が近い／-20%以下 底値圏")
+        fields.append({"name": "📉 信用評価損益率", "value": v[:1024], "inline": False})
+
     # 背景
     ls = []
     if "ドル円" in ov:
@@ -420,7 +474,9 @@ def main() -> None:
 
     HIST.parent.mkdir(parents=True, exist_ok=True)
     keep = sorted(days)[-400:]
-    HIST.write_text(json.dumps({"updated": now.strftime("%Y-%m-%d %H:%M"), "days": {k: days[k] for k in keep}},
+    mh = hist.get("matsui", {})
+    mh = {k: mh[k] for k in list(mh)[-60:]}
+    HIST.write_text(json.dumps({"updated": now.strftime("%Y-%m-%d %H:%M"), "days": {k: days[k] for k in keep}, "matsui": mh},
                                ensure_ascii=False, separators=(",", ":")))
 
     wd = "月火水木金土日"[today.weekday()]
