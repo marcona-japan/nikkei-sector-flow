@@ -68,7 +68,7 @@ def tasks_for(d: date) -> list[dict]:
         add("sector", sec, ["@sector"], "sync", catch=25, writer=True)
         # 場中速報のリアルタイム版（日経225で試行）。区切りの1〜2分後に記録・送信
         rt = ["09:31", "10:01", "10:31", "11:01", "11:31", "12:31", "13:01", "13:31", "14:01", "14:31", "15:01", "15:32"]
-        add("rt", rt, ["scripts/rt.py", "--universe", "n225", "--notify", "auto"], "sync", catch=8, writer=True)
+        add("rt", rt, ["scripts/rt.py", "--universe", "n225", "--notify", "off"], "sync", catch=8, writer=True)
         add("ranking", ["11:40", "15:40"], ["scripts/ranking.py", "--notify", "on"], catch=40)
         add("market", ["18:15"], ["scripts/market.py", "--notify", "on"], "sync", catch=90, writer=True)
     if w == 4:
@@ -129,7 +129,7 @@ def run_sync(task: dict) -> None:
     sh("git", "pull", "--rebase", "-q")  # 最新のスクリプトで実行する
     if task["cmd"] == ["@sector"]:
         for extra in ([], ["--universe", "g250"]):
-            p = sh(PY, "scripts/run.py", "--notify", "auto", *extra)
+            p = sh(PY, "scripts/run.py", "--notify", "off", *extra)  # Discord通知なし（アプリで確認）
             print(p.stdout[-1500:], p.stderr[-800:])
     else:
         p = sh(PY, *task["cmd"])
