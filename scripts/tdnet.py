@@ -23,6 +23,8 @@ import notify  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 WATCH = ROOT / "data" / "watchlist.csv"
 SEEN = ROOT / "data" / "tdnet_seen.json"
+FAIL = ROOT / "data" / "tdnet_fail.json"  # データ元に連続で接続できなかった回数と、警告送信済みか
+FAIL_ALERT_AFTER = 6  # この回数だけ連続で失敗したらDiscordに警告（約1〜2時間分）
 HIST = ROOT / "docs" / "data" / "tdnet.json"
 JST = timezone(timedelta(hours=9))
 API = "https://webapi.yanoshin.jp/webapi/tdnet/list/{d}.json?limit=3000"
@@ -134,6 +136,30 @@ def group_embeds(xs: list[dict]) -> list[dict]:
     return out
 
 
+def track_source_health(ok: bool, notify_mode: str) -> None:
+    """データ元の不調が続いたら1回だけ警告し、復旧したらその旨を送る（落ちていても無言にならないように）"""
+    try:
+        st = json.loads(FAIL.read_text()) if FAIL.exists() else {}
+    except Exception:  # noqa: BLE001
+        st = {}
+    count, alerted = int(st.get("count", 0)), bool(st.get("alerted", False))
+    if ok:
+        if alerted and notify_mode != "off":
+            notify.send([{"title": "✅ TDnetデータ元に復旧しました", "color": 0x1BAF7A,
+                          "description": "適時開示のチェックを再開しました。停止中の開示も順次通知します。"}],
+                        "TDnet開示チェック", "tdnet")
+        if st:
+            FAIL.unlink(missing_ok=True)
+        return
+    count += 1
+    if count >= FAIL_ALERT_AFTER and not alerted and notify_mode != "off":
+        alerted = bool(notify.send([{"title": "⚠️ TDnetデータ元に接続できません", "color": 0xD03B3B,
+                                     "description": f"{count}回連続で取得に失敗しました（webapi.yanoshin.jp）。"
+                                                    "復旧するまで適時開示の通知は届きません。"}],
+                                   "TDnet開示チェック", "tdnet"))
+    FAIL.write_text(json.dumps({"count": count, "alerted": alerted}))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="対象日 YYYY-MM-DD（省略時は今日と前日）")
@@ -158,6 +184,7 @@ def main() -> None:
             x = normalize(it, watch)
             if x:
                 found.append(x)
+    track_source_health(bool(ok_days), a.notify)
     if not ok_days:
         print("TDnetのデータ元に接続できないため、今回はスキップします")
         return

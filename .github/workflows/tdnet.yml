@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A docs/data/tdnet.json data/tdnet_seen.json
+          git add -A docs/data/tdnet.json data/
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
           git commit -m "tdnet: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
           git pull --rebase -q && git push
