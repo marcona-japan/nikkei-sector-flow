@@ -75,10 +75,7 @@ def tasks_for(d: date) -> list[dict]:
         add("weekly", ["18:30"], ["scripts/weekly.py", "--notify", "on"], catch=120)
     if w <= 5:
         add("today", ["07:30"], ["scripts/today.py", "--notify", "on"], catch=60)
-    if w in (0, 2, 3, 4):
-        add("closing", ["21:30"], ["scripts/closing.py", "--notify", "on"], catch=25)
-    if w == 1:
-        add("closing", ["23:30"], ["scripts/closing.py", "--notify", "on"], catch=25)
+    # FX決済リマインド（closing.py）は停止中
     if w == 6:
         add("weekend", ["18:00"], ["scripts/weekend.py", "--notify", "on"], catch=120)
     # 指標15分前リマインド（毎日 :05 / :35。中で時刻まで待つ）
