@@ -9,6 +9,7 @@ indicator("セクター資金移動（場中）", shorttitle = "資金移動", o
 // ───────── 設定
 windowMin = input.int(30, "直近の集計時間（分）", minval = 5, step = 5, group = "表示")
 alertPt   = input.float(3.0, "アラート：当日比がこのpt以上で流入通知", minval = 0.5, step = 0.5, group = "アラート")
+useTwo    = input.bool(true, "各業種で2銘柄目も使う（オフでrequest.securityが34→17回。無料プラン向け）", group = "表示")
 showTable = input.bool(true, "一覧表を表示", group = "表示")
 tablePos  = input.string("右上", "一覧表の位置", options = ["右上", "右下", "左上", "左下"], group = "表示")
 fontPt    = input.int(20, "一覧表の文字サイズ（pt）", minval = 8, maxval = 40, group = "表示")
@@ -69,7 +70,7 @@ s17b = input.symbol("TSE:8802", "銘柄2", group = g17, inline = g17)
 
 // ───────── 共通処理
 // 東証の取引時間（9:00〜15:30）だけを集計。先物の夜間セッションでは大引け時点の値を表示し続ける
-inSess = not na(time(timeframe.period, "0900-1530", "Asia/Tokyo"))
+inSess = not timeframe.isdwm and not na(time(timeframe.period, "0900-1530", "Asia/Tokyo"))
 curDate = year(time, "Asia/Tokyo") * 10000 + month(time, "Asia/Tokyo") * 100 + dayofmonth(time, "Asia/Tokyo")
 var int lastDate = na
 newDay = inSess and (na(lastDate) or curDate != lastDate)
@@ -79,13 +80,19 @@ barMin = timeframe.in_seconds() / 60.0
 winLen = math.max(1, int(math.round(windowMin / barMin)))
 
 // 銘柄の [売買代金, 当日騰落率%]
-stock(simple string sym) =>
+stockOf(simple string sym) =>
     [v, c, o] = request.security(sym, timeframe.period, [close * volume, close, open], ignore_invalid_symbol = true)
     var float dayOpen = na
     if newDay or na(dayOpen)
         dayOpen := o
     pct = na(c) or na(dayOpen) or dayOpen == 0 ? na : (c / dayOpen - 1) * 100
     [nz(v), pct]
+
+stock(simple string sym) =>
+    if sym == ""
+        [0.0, float(na)]
+    else
+        stockOf(sym)
 
 // 当日累計（寄り付きからリセット）
 dayCum(float x) =>
@@ -98,7 +105,7 @@ dayCum(float x) =>
 // 業種 = 2銘柄合計。[直近窓の売買代金, 当日累計, 騰落率平均]
 sector(simple string a, simple string b) =>
     [va, pa] = stock(a)
-    [vb, pb] = stock(b)
+    [vb, pb] = stock(useTwo ? b : "")
     v = va + vb
     pct = na(pa) ? pb : na(pb) ? pa : (pa + pb) / 2
     [math.sum(v, winLen), dayCum(v), pct]
@@ -185,7 +192,7 @@ if showTable and barstate.islast
         table.cell(tb, 1, r + 1, na(sw) ? "-" : str.tostring(sw, "0.0") + "%", text_color = txt, text_size = fontPt, text_halign = text.align_right)
         table.cell(tb, 2, r + 1, na(dl) ? "-" : (dl >= 0 ? "+" : "") + str.tostring(dl, "0.0") + "pt", text_color = cellTx(dl), bgcolor = cellBg(dl), text_size = fontPt, text_halign = text.align_right)
         table.cell(tb, 3, r + 1, na(pc) ? "-" : (pc >= 0 ? "+" : "") + str.tostring(pc, "0.0") + "%", text_color = na(pc) ? #b2b5be : pc >= 0 ? #ff6b6b : #5ea8ff, text_size = fontPt, text_halign = text.align_right)
-    note = barMin > windowMin ? "⚠ 足が集計時間より長い：5分足推奨" : inSess ? "赤=資金流入 青=流出（当日平均シェア比）" : "取引時間外：直近の大引け時点の値"
+    note = timeframe.isdwm ? "⚠ 日足以上は非対応：1〜15分足にしてください" : barMin > windowMin ? "⚠ 足が集計時間より長い：5分足推奨" : inSess ? "赤=資金流入 青=流出（当日平均シェア比）" : "取引時間外：直近の大引け時点の値"
     table.cell(tb, 0, 18, note, text_color = #d1d4dc, bgcolor = hdrBg, text_size = math.max(8, int(fontPt * 0.7)), text_halign = text.align_left)
     table.merge_cells(tb, 0, 18, 3, 18)
 
