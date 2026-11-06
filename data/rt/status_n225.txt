@@ -1,3 +1,11 @@
-2026-11-06 09:31 取得 223/225
-2914: 読み取り失敗 px=False pv=True tv=False len=353606
-6963: 読み取り失敗 px=False pv=True tv=False len=356016
+2026-11-06 10:01 取得 143/225
+2914: 読み取り失敗 px=False pv=True tv=False len=353691
+9001: HTTP 500
+9005: HTTP 500
+9007: HTTP 500
+9008: HTTP 500
+9009: HTTP 500
+9020: HTTP 500
+9021: HTTP 500
+9022: HTTP 500
+連続して取得できないため打ち切り
