@@ -1,1 +1,3 @@
-2026-11-05 15:32 取得 225/225
+2026-11-06 09:31 取得 223/225
+2914: 読み取り失敗 px=False pv=True tv=False len=353606
+6963: 読み取り失敗 px=False pv=True tv=False len=356016
