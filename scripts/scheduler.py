@@ -81,6 +81,8 @@ def tasks_for(d: date) -> list[dict]:
         add("closing", ["23:30"], ["scripts/closing.py", "--notify", "on"], catch=25)
     if w == 6:
         add("weekend", ["18:00"], ["scripts/weekend.py", "--notify", "on"], catch=120)
+    # 要人発言・為替介入関連のニュース（10分おき・毎日）
+    add("news", every("00:03", "23:53", 10), ["scripts/news.py", "--notify", "on"], "sync", catch=8, writer=True)
     # 指標15分前リマインド（毎日 :05 / :35。中で時刻まで待つ）
     add("prealert", [x for h in range(24) for x in (f"{h:02d}:05", f"{h:02d}:35")],
         ["scripts/prealert.py", "--notify", "on"], catch=15)
